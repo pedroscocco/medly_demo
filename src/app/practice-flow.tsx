@@ -45,7 +45,6 @@ export default function () {
     };
 
     const handleClose = () => {
-        setCurrentSessionStep(0);
         router.dismissTo("/" as any);
     };
 
