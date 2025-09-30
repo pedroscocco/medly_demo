@@ -49,6 +49,11 @@ npm run web
 - **Mock API** (`src/api/`): Simulates backend responses for offline development
 - **State Management** (`src/store/`): Zustand stores for app state and user progress
 - **React Query Hooks** (`src/hooks/`): Data fetching with automatic caching
+- **Component Architecture** (`src/components/`): Modular, reusable UI components
+  - QuestionHeader: Progress bar, close button, and question type badge
+  - MultipleChoiceQuestion: Question display and answer options
+  - CheckButton: Bottom action button for answer submission
+  - Composable design for flexible question flow assembly
 - **Design System** (`src/styles/`): Centralized style constants for consistent theming
   - Colors, spacing, typography, shadows, and other design tokens
   - Component-specific style files using design system constants
@@ -68,11 +73,16 @@ npm run web
 src/
 ├── api/          # Mock API and data fetching utilities
 ├── app/          # Screen components and navigation
-├── components/   # Reusable UI components (MultipleChoiceQuestion, etc.)
+├── components/   # Modular, reusable UI components
+│   ├── QuestionHeader.tsx           # Progress bar and navigation
+│   ├── MultipleChoiceQuestion.tsx   # MCQ question content
+│   └── CheckButton.tsx              # Answer submission button
 ├── hooks/        # React Query hooks
 ├── store/        # Zustand state management
 ├── styles/       # Design system and component styles
 │   ├── designSystem.ts              # Centralized style constants
-│   └── MultipleChoiceQuestion.styles.ts
+│   ├── QuestionHeader.styles.ts
+│   ├── MultipleChoiceQuestion.styles.ts
+│   └── CheckButton.styles.ts
 └── types.ts      # TypeScript type definitions
 ```

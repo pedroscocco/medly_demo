@@ -5,6 +5,7 @@ interface AppState {
 }
 
 interface AppActions {
+  setNextStep: () => void;
   setCurrentSessionStep: (sessionStep: number) => void;
   clearSession: () => void;
 }
@@ -14,6 +15,10 @@ export const useAppSessionStore = create<AppState & AppActions>((set) => ({
   currentSessionStep: 0,
 
   // Actions
+  setNextStep: () =>
+    set((state) => ({
+      currentSessionStep: state.currentSessionStep + 1,
+    })),
   setCurrentSessionStep: (sessionStep: number) =>
     set({
       currentSessionStep: sessionStep,

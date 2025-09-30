@@ -38,12 +38,16 @@ To help users practice and test their understanding of various topics through a 
 - ✅ Mock API with sample question data
 - ✅ React Query integration for data fetching and caching
 - ✅ Zustand store for app state management
-- ✅ Multiple choice question UI component
-- ✅ Practice flow screen with question navigation
+- ✅ Modular component architecture
+  - QuestionHeader component (progress, navigation, badges)
+  - MultipleChoiceQuestion component (question and options)
+  - CheckButton component (action button)
+- ✅ Practice flow screen with composable components
 - ✅ Progress tracking with visual progress bar
 - ✅ Question type routing (MCQ implemented)
 - ✅ Design system with centralized style constants
 - ✅ Component-specific styling architecture
+- ✅ Session state management with Zustand actions
 
 ### In Progress
 - 🚧 Answer validation and feedback
