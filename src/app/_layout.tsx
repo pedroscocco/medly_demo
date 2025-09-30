@@ -1,15 +1,15 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { createContext, useState } from "react";
 
-export const QuestionsContext = createContext({});
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const [questions, setQuestions] = useState({});
   return (
-    <QuestionsContext value={[questions, setQuestions]}>
+    <QueryClientProvider client={queryClient}>
       <Stack>
         <Stack.Screen name="index" />
-        <Stack.Screen name="[questionId]" />
-      </Stack >
-    </QuestionsContext>);
+        <Stack.Screen name="practice-flow" />
+      </Stack>
+    </QueryClientProvider>
+  );
 }

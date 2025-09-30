@@ -1,27 +1,28 @@
 import { useRouter } from "expo-router";
-import { useContext, useEffect } from "react";
 import { Button, Text, View } from "react-native";
-import fetch_questions from "../api/fetch_questions";
-import { QuestionsContext } from "./_layout";
+import useSessionQuery from "../hooks/useSessioQuery";
 
 export default function Index() {
-  const router = useRouter()
-  const [questionsSpec, setQuestionsSpec] = useContext<any>(QuestionsContext);
+  const router = useRouter();
+  // const setSession = useAppSessionStore((state) => state.setSession);
 
+  const { data, isLoading, error } = useSessionQuery();
 
-  const callAPI = async () => {
-    const response = await fetch_questions();
-    const formatedResponse = response.steps.reduce(
-      (formated, question) => {
-        return {...formated, [question.index]: question };
-      }, {});
-    console.log(formatedResponse);
-    setQuestionsSpec(formatedResponse);
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading questions...</Text>
+      </View>
+    );
   }
 
-  useEffect(() => {
-    callAPI();
-  }, []);
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Error loading questions: {error.message}</Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -31,9 +32,11 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen. {Object.values(questionsSpec).length}</Text>
-
-      <Button title='Start Questions Flow' onPress={() => router.push("/0")}></Button>
+      <Text>Questions loaded: {data?.steps.length || 0}</Text>
+      <Button
+        title='Start Questions Flow'
+        onPress={() => router.push('./practice-flow' )}
+      />
     </View>
   );
 }
