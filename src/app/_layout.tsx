@@ -8,7 +8,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <Stack>
         <Stack.Screen name="index" />
-        <Stack.Screen name="practice-flow" />
+        <Stack.Screen name="practice-flow" options={{headerShown: false}} />
       </Stack>
     </QueryClientProvider>
   );

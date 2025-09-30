@@ -32,10 +32,25 @@ To help users practice and test their understanding of various topics through a 
 - Intuitive navigation between questions
 - Responsive feedback on answer validation
 
-## Notes
-- Initial implementation includes basic question list and detail views
-- API endpoint exists for fetching questions
-- Future enhancements may include score tracking, question categories, and progress persistence
+## Implementation Status
+
+### Completed
+- ✅ Mock API with sample question data
+- ✅ React Query integration for data fetching and caching
+- ✅ Zustand store for app state management
+- ✅ Multiple choice question UI component
+- ✅ Practice flow screen with question navigation
+- ✅ Progress tracking with visual progress bar
+- ✅ Question type routing (MCQ implemented)
+
+### In Progress
+- 🚧 Answer validation and feedback
+- 🚧 Sort question UI component
+
+### Not Started
+- ⏳ Short answer question UI component
+- ⏳ Session completion summary
+- ⏳ Answer marking/grading logic
 
 ---
 

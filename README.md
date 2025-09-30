@@ -10,13 +10,16 @@ This app helps users practice and test their understanding of various topics thr
 
 - **Home Page**: Entry point with navigation to practice mode
 - **Practice Flow**: Interactive question interface with sequential progression
-- **Multiple Question Types**:
-  - Multiple choice questions (MCQ)
-  - Short answer questions
-  - Sorting/categorization questions
-- **Answer Validation**: Immediate feedback on submitted answers
-- **Progress Tracking**: Track completion through question sets
+- **Multiple Choice Questions**: Clean UI with selectable options and visual feedback
+- **Progress Tracking**: Visual progress bar with step counter (e.g., 1/10)
+- **Question Navigation**: Sequential flow through question sets
 - **Offline Development**: Mock API for frontend development without backend dependency
+
+### Planned Features
+- Answer validation with immediate feedback
+- Sort/categorization questions with drag-and-drop
+- Short answer questions with text input
+- Session completion summary
 
 ## Tech Stack
 
@@ -62,6 +65,7 @@ npm run web
 src/
 ├── api/          # Mock API and data fetching utilities
 ├── app/          # Screen components and navigation
+├── components/   # Reusable UI components (MultipleChoiceQuestion, etc.)
 ├── hooks/        # React Query hooks
 ├── store/        # Zustand state management
 └── types.ts      # TypeScript type definitions
