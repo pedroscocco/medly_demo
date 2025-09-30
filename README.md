@@ -49,6 +49,9 @@ npm run web
 - **Mock API** (`src/api/`): Simulates backend responses for offline development
 - **State Management** (`src/store/`): Zustand stores for app state and user progress
 - **React Query Hooks** (`src/hooks/`): Data fetching with automatic caching
+- **Design System** (`src/styles/`): Centralized style constants for consistent theming
+  - Colors, spacing, typography, shadows, and other design tokens
+  - Component-specific style files using design system constants
 - **Type Definitions** (`src/types.ts`): TypeScript interfaces for question data structures
 
 ## Future Enhancements
@@ -68,5 +71,8 @@ src/
 ├── components/   # Reusable UI components (MultipleChoiceQuestion, etc.)
 ├── hooks/        # React Query hooks
 ├── store/        # Zustand state management
+├── styles/       # Design system and component styles
+│   ├── designSystem.ts              # Centralized style constants
+│   └── MultipleChoiceQuestion.styles.ts
 └── types.ts      # TypeScript type definitions
 ```

@@ -3,12 +3,15 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion";
 import useSessionQuery from "../hooks/useSessioQuery";
 import { useAppSessionStore } from "../store/useAppSessionStore";
+import { colors, fontSize } from "../styles/designSystem";
 import { McqQuestionSpec } from "../types";
 
 export default function () {
   const router = useRouter();
   const { data, isLoading, error } = useSessionQuery();
   const fullQuestionStepsList = data?.steps || [];
+  
+//   const currentSessionStep = 0;
   const currentSessionStep = useAppSessionStore(
     (state) => state.currentSessionStep
   );
@@ -19,7 +22,7 @@ export default function () {
   if (isLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4A9EFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -85,7 +88,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    fontSize: 16,
-    color: "#EF4444",
+    fontSize: fontSize.sm,
+    color: colors.error,
   },
 });

@@ -42,6 +42,8 @@ To help users practice and test their understanding of various topics through a 
 - ✅ Practice flow screen with question navigation
 - ✅ Progress tracking with visual progress bar
 - ✅ Question type routing (MCQ implemented)
+- ✅ Design system with centralized style constants
+- ✅ Component-specific styling architecture
 
 ### In Progress
 - 🚧 Answer validation and feedback
