@@ -7,6 +7,7 @@ interface SortQuestionProps {
   heading: string;
   options: AnswerOption[];
   categories: string[];
+  currentAnswer: { [key: string]: string[] };
   onAnswerChange: (categoryMapping: { [key: string]: string[] }) => void;
   disabled?: boolean;
 }
@@ -15,25 +16,13 @@ export default function SortQuestion({
   heading,
   options,
   categories,
+  currentAnswer,
   onAnswerChange,
   disabled = false,
 }: SortQuestionProps) {
-  // State: { categoryName: [itemTexts] }
-  const [categoryItems, setCategoryItems] = useState<{
-    [key: string]: string[];
-  }>(() => {
-    // Initialize empty arrays for each category
-    const initial: { [key: string]: string[] } = {};
-    categories.forEach((cat) => {
-      initial[cat] = [];
-    });
-    return initial;
-  });
-
-  // Items that haven't been placed in any category yet
-  const [unassignedItems, setUnassignedItems] = useState<string[]>(
-    options.map((opt) => opt.option)
-  );
+  // Calculate unassigned items based on currentAnswer
+  const placedItems = Object.values(currentAnswer).flat();
+  const unassignedItems = options.map((opt) => opt.option).filter((item) => !placedItems.includes(item));
 
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
@@ -45,8 +34,13 @@ export default function SortQuestion({
   const handleCategoryPress = (category: string) => {
     if (disabled || !selectedItem) return;
 
+    // Ensure all categories exist in the answer object
+    const newCategoryItems: { [key: string]: string[] } = {};
+    categories.forEach((cat) => {
+      newCategoryItems[cat] = currentAnswer[cat] || [];
+    });
+
     // Check if item is already in a category, remove it from there
-    const newCategoryItems = { ...categoryItems };
     Object.keys(newCategoryItems).forEach((cat) => {
       newCategoryItems[cat] = newCategoryItems[cat].filter(
         (i) => i !== selectedItem
@@ -56,11 +50,6 @@ export default function SortQuestion({
     // Add to the selected category
     newCategoryItems[category] = [...newCategoryItems[category], selectedItem];
 
-    // Remove from unassigned if it was there
-    const newUnassigned = unassignedItems.filter((i) => i !== selectedItem);
-
-    setCategoryItems(newCategoryItems);
-    setUnassignedItems(newUnassigned);
     setSelectedItem(null);
 
     // Notify parent of change
@@ -94,7 +83,7 @@ export default function SortQuestion({
             >
               <Text style={styles.categoryLabel}>{category}</Text>
               <View style={styles.categoryItems}>
-                {categoryItems[category].map((item, index) => (
+                {currentAnswer[category]?.map((item, index) => (
                   <TouchableOpacity
                     key={index}
                     style={styles.itemInCategory}

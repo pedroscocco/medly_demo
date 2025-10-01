@@ -15,8 +15,16 @@ export default function Index() {
   const currentUserStep = useAppSessionStore(
     (state) => state.currentUserStep
   );
+  const setCurrentUserStep = useAppSessionStore(
+    (state) => state.setCurrentUserStep
+  );
+  const markingResults = useAppSessionStore((state) => state.markingResults);
+  const completedQuestionsCount = Object.keys(markingResults).length;
 
   const handleStartPractice = () => {
+    if (currentUserStep === null) {
+      setCurrentUserStep(0); // Start from the first question
+    }
     router.push("./practice-flow");
   };
 
@@ -79,7 +87,7 @@ export default function Index() {
             <View style={styles.statsCard}>
               <Text style={styles.statsText}>Current Progress</Text>
               <Text style={styles.statsNumber}>
-                {currentUserStep} / {data.steps.length}
+                {completedQuestionsCount} / {data.steps.length}
               </Text>
             </View>
           )}
@@ -102,7 +110,7 @@ export default function Index() {
                 onPress={handleResetPractice}
               >
                 <Text style={styles.secondaryButtonText}>
-                  Reset Practice Flow
+                  Restart Practice
                 </Text>
               </TouchableOpacity>
             )}

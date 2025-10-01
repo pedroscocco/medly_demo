@@ -53,6 +53,9 @@ export type AnswerOption = {
 }
 
 // Marking/Scoring Types
+export type McqAnswer = string;
+export type SortAnswer = { [categoryName: string]: string[] };
+
 export type MarkingResult = {
   isCorrect: boolean;
   score: number; // 0-100 percentage
@@ -60,7 +63,5 @@ export type MarkingResult = {
   correctItems: number;
   itemResults?: { [itemText: string]: boolean }; // For sort questions: which items are correctly placed
   feedback?: string;
-}
-
-export type McqAnswer = string;
-export type SortAnswer = { [categoryName: string]: string[] };
+  userAnswer: McqAnswer | SortAnswer; // Store the user's answer
+};

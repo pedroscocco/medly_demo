@@ -38,6 +38,7 @@ async function markQuestion(
     totalItems: 0,
     correctItems: 0,
     feedback: "Unsupported question type",
+    userAnswer,
   };
 }
 
@@ -58,6 +59,7 @@ function markMcqQuestion(
     feedback: isCorrect
       ? "Correct!"
       : `Incorrect. The correct answer is: ${questionSpec.questionData.correctAnswer}`,
+    userAnswer,
   };
 }
 
@@ -107,13 +109,11 @@ function markSortQuestion(
     correctItems,
     itemResults,
     feedback,
+    userAnswer,
   };
 }
 
 export function useMarkQuestion() {
-  const [markingResult, setMarkingResult] = useState<MarkingResult | null>(
-    null
-  );
   const [isMarking, setIsMarking] = useState(false);
 
   const markAnswer = async (
@@ -124,7 +124,6 @@ export function useMarkQuestion() {
 
     try {
       const result = await markQuestion(questionSpec, userAnswer);
-      setMarkingResult(result);
       setIsMarking(false);
       return result;
     } catch (error) {
@@ -134,15 +133,8 @@ export function useMarkQuestion() {
     }
   };
 
-  const resetMarking = () => {
-    setMarkingResult(null);
-    setIsMarking(false);
-  };
-
   return {
-    markingResult,
     isMarking,
     markAnswer,
-    resetMarking,
   };
 }

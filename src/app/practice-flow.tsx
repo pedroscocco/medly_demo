@@ -20,8 +20,7 @@ export default function () {
         {}
     );
 
-    const { markingResult, isMarking, markAnswer, resetMarking } =
-        useMarkQuestion();
+    const { isMarking, markAnswer } = useMarkQuestion();
 
     const currentUserStep = useAppSessionStore(
         (state) => state.currentUserStep
@@ -30,8 +29,13 @@ export default function () {
     const setCurrentUserStep = useAppSessionStore(
         (state) => state.setCurrentUserStep
     );
+    const markingResults = useAppSessionStore((state) => state.markingResults);
+    const setMarkingResult = useAppSessionStore(
+        (state) => state.setMarkingResult
+    );
 
     const currentQuestion = fullQuestionStepsList[currentUserStep];
+    const markingResult = markingResults[currentUserStep];
 
     const edgeCaseView = renderEdgeCase(isLoading, error, currentQuestion);
     if (edgeCaseView) {
@@ -44,7 +48,8 @@ export default function () {
                 ? selectedAnswer!
                 : sortAnswer;
 
-        await markAnswer(currentQuestion, userAnswer);
+        const result = await markAnswer(currentQuestion, userAnswer);
+        setMarkingResult(currentUserStep, result);
     };
 
     const handleContinue = () => {
@@ -53,7 +58,6 @@ export default function () {
             setNextStep();
             setSelectedAnswer(null); // Reset selection for next question
             setSortAnswer({}); // Reset sort answer
-            resetMarking(); // Reset marking result
         } else {
             // Finished all questions, go back to home
             setCurrentUserStep(null);
@@ -107,7 +111,7 @@ export default function () {
                 <MultipleChoiceQuestion
                     heading={currentQuestion.heading}
                     options={currentQuestion.questionData.options}
-                    selectedAnswer={selectedAnswer}
+                    selectedAnswer={markingResult ? (markingResult.userAnswer as string) : selectedAnswer}
                     onSelectAnswer={setSelectedAnswer}
                     disabled={!!markingResult}
                 />
@@ -116,6 +120,7 @@ export default function () {
                     heading={currentQuestion.heading}
                     options={currentQuestion.questionData.options}
                     categories={currentQuestion.questionData.categories}
+                    currentAnswer={markingResult ? (markingResult.userAnswer as { [key: string]: string[] }) : sortAnswer}
                     onAnswerChange={handleSortAnswerChange}
                     disabled={!!markingResult}
                 />
