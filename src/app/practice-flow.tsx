@@ -5,6 +5,7 @@ import CheckButton from "../components/CheckButton";
 import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion";
 import QuestionHeader from "../components/QuestionHeader";
 import SortQuestion from "../components/SortQuestion";
+import { useMarkQuestion } from "../hooks/useMarkQuestion";
 import useSessionQuery from "../hooks/useSessioQuery";
 import { useAppSessionStore } from "../store/useAppSessionStore";
 import { colors, fontSize } from "../styles/designSystem";
@@ -18,6 +19,9 @@ export default function () {
     const [sortAnswer, setSortAnswer] = useState<{ [key: string]: string[] }>(
         {}
     );
+
+    const { markingResult, isMarking, markAnswer, resetMarking } =
+        useMarkQuestion();
 
     const currentSessionStep = useAppSessionStore(
         (state) => state.currentSessionStep
@@ -34,13 +38,22 @@ export default function () {
         return edgeCaseView;
     }
 
-    const handleCheck = () => {
-        // For now, just move to next question
-        // TODO: Validate answer and show feedback
+    const handleCheck = async () => {
+        const userAnswer =
+            currentQuestion.questionData.questionType === "mcq"
+                ? selectedAnswer!
+                : sortAnswer;
+
+        await markAnswer(currentQuestion, userAnswer);
+    };
+
+    const handleContinue = () => {
+        // Move to next question after seeing results
         if (currentSessionStep < fullQuestionStepsList.length - 1) {
             setNextStep();
             setSelectedAnswer(null); // Reset selection for next question
             setSortAnswer({}); // Reset sort answer
+            resetMarking(); // Reset marking result
         } else {
             // Finished all questions, go back to home
             setCurrentSessionStep(0);
@@ -74,7 +87,7 @@ export default function () {
     // Get question type label
     const getQuestionTypeLabel = () => {
         if (currentQuestion.questionData.questionType === "mcq") {
-            return "Multiple choice";
+            return "Choose the correct answer";
         } else if (currentQuestion.questionData.questionType === "sort") {
             return "Drag into the correct category";
         }
@@ -96,6 +109,7 @@ export default function () {
                     options={currentQuestion.questionData.options}
                     selectedAnswer={selectedAnswer}
                     onSelectAnswer={setSelectedAnswer}
+                    disabled={!!markingResult}
                 />
             ) : currentQuestion.questionData.questionType === "sort" ? (
                 <SortQuestion
@@ -103,6 +117,7 @@ export default function () {
                     options={currentQuestion.questionData.options}
                     categories={currentQuestion.questionData.categories}
                     onAnswerChange={handleSortAnswerChange}
+                    disabled={!!markingResult}
                 />
             ) : (
                 <View
@@ -116,7 +131,27 @@ export default function () {
                 </View>
             )}
 
-            <CheckButton onPress={handleCheck} disabled={!isCheckEnabled()} />
+            {/* Temporary Result Display */}
+            {markingResult && (
+                <View style={styles.resultContainer}>
+                    <Text style={styles.resultScore}>
+                        Score: {markingResult.score}%
+                    </Text>
+                    <Text style={styles.resultFeedback}>
+                        {markingResult.feedback}
+                    </Text>
+                    <Text style={styles.resultDetails}>
+                        {markingResult.correctItems} / {markingResult.totalItems} correct
+                    </Text>
+                </View>
+            )}
+
+            <CheckButton
+                onPress={markingResult ? handleContinue : handleCheck}
+                disabled={!markingResult && !isCheckEnabled()}
+                text={markingResult ? "Continue" : "Check"}
+                loading={isMarking}
+            />
         </View>
     );
 }
@@ -163,5 +198,29 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: fontSize.sm,
         color: colors.error,
+    },
+    resultContainer: {
+        marginHorizontal: 20,
+        marginBottom: 10,
+        padding: 16,
+        backgroundColor: colors.primaryLight,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.primary,
+    },
+    resultScore: {
+        fontSize: fontSize.lg,
+        fontWeight: "bold",
+        color: colors.primary,
+        marginBottom: 8,
+    },
+    resultFeedback: {
+        fontSize: fontSize.sm,
+        color: colors.black,
+        marginBottom: 4,
+    },
+    resultDetails: {
+        fontSize: fontSize.xs,
+        color: colors.gray500,
     },
 });

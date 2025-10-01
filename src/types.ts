@@ -51,3 +51,16 @@ export type QuestionSpec = McqQuestionSpec | SortQuestionSpec;
 export type AnswerOption = {
   option: string
 }
+
+// Marking/Scoring Types
+export type MarkingResult = {
+  isCorrect: boolean;
+  score: number; // 0-100 percentage
+  totalItems: number;
+  correctItems: number;
+  itemResults?: { [itemText: string]: boolean }; // For sort questions: which items are correctly placed
+  feedback?: string;
+}
+
+export type McqAnswer = string;
+export type SortAnswer = { [categoryName: string]: string[] };

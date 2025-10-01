@@ -7,6 +7,7 @@ interface MultipleChoiceQuestionProps {
   options: AnswerOption[];
   selectedAnswer: string | null;
   onSelectAnswer: (answer: string) => void;
+  disabled?: boolean;
 }
 
 export default function MultipleChoiceQuestion({
@@ -14,6 +15,7 @@ export default function MultipleChoiceQuestion({
   options,
   selectedAnswer,
   onSelectAnswer,
+  disabled = false,
 }: MultipleChoiceQuestionProps) {
   return (
     <>
@@ -31,7 +33,9 @@ export default function MultipleChoiceQuestion({
               styles.optionButton,
               selectedAnswer === option.option && styles.optionButtonSelected,
             ]}
-            onPress={() => onSelectAnswer(option.option)}
+            onPress={() => !disabled && onSelectAnswer(option.option)}
+            disabled={disabled}
+            activeOpacity={disabled ? 1 : 0.7}
           >
             <Text
               style={[

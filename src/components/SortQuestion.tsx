@@ -8,6 +8,7 @@ interface SortQuestionProps {
   options: AnswerOption[];
   categories: string[];
   onAnswerChange: (categoryMapping: { [key: string]: string[] }) => void;
+  disabled?: boolean;
 }
 
 export default function SortQuestion({
@@ -15,6 +16,7 @@ export default function SortQuestion({
   options,
   categories,
   onAnswerChange,
+  disabled = false,
 }: SortQuestionProps) {
   // State: { categoryName: [itemTexts] }
   const [categoryItems, setCategoryItems] = useState<{
@@ -36,11 +38,12 @@ export default function SortQuestion({
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const handleItemPress = (item: string) => {
+    if (disabled) return;
     setSelectedItem(item);
   };
 
   const handleCategoryPress = (category: string) => {
-    if (!selectedItem) return;
+    if (disabled || !selectedItem) return;
 
     // Check if item is already in a category, remove it from there
     const newCategoryItems = { ...categoryItems };
@@ -65,6 +68,7 @@ export default function SortQuestion({
   };
 
   const handleItemInCategoryPress = (item: string, fromCategory: string) => {
+    if (disabled) return;
     setSelectedItem(item);
   };
 
