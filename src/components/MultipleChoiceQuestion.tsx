@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import { AnswerOption } from "../types";
+import { AnswerOption, MarkingResult } from "../types";
 import { styles } from "../styles/MultipleChoiceQuestion.styles";
 
 interface MultipleChoiceQuestionProps {
@@ -8,6 +8,7 @@ interface MultipleChoiceQuestionProps {
   selectedAnswer: string | null;
   onSelectAnswer: (answer: string) => void;
   disabled?: boolean;
+  markingResult?: MarkingResult | null;
 }
 
 export default function MultipleChoiceQuestion({
@@ -16,7 +17,10 @@ export default function MultipleChoiceQuestion({
   selectedAnswer,
   onSelectAnswer,
   disabled = false,
+  markingResult = null,
 }: MultipleChoiceQuestionProps) {
+  const isCorrect = markingResult?.isCorrect;
+
   return (
     <>
       {/* Question Card */}
@@ -26,27 +30,34 @@ export default function MultipleChoiceQuestion({
 
       {/* Answer Options */}
       <View style={styles.optionsContainer}>
-        {options.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.optionButton,
-              selectedAnswer === option.option && styles.optionButtonSelected,
-            ]}
-            onPress={() => !disabled && onSelectAnswer(option.option)}
-            disabled={disabled}
-            activeOpacity={disabled ? 1 : 0.7}
-          >
-            <Text
+        {options.map((option, index) => {
+          const isSelected = selectedAnswer === option.option;
+          const showFeedback = markingResult && isSelected;
+
+          return (
+            <TouchableOpacity
+              key={index}
               style={[
-                styles.optionText,
-                selectedAnswer === option.option && styles.optionTextSelected,
+                styles.optionButton,
+                isSelected && !markingResult && styles.optionButtonSelected,
+                showFeedback && isCorrect && styles.optionButtonCorrect,
+                showFeedback && !isCorrect && styles.optionButtonIncorrect,
               ]}
+              onPress={() => !disabled && onSelectAnswer(option.option)}
+              disabled={disabled}
+              activeOpacity={disabled ? 1 : 0.7}
             >
-              {option.option}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.optionText,
+                  isSelected && styles.optionTextSelected,
+                ]}
+              >
+                {option.option}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </>
   );

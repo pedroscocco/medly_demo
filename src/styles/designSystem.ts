@@ -19,8 +19,10 @@ export const colors = {
   gray400: "#9CA3AF",
 
   // Semantic colors
-  error: "#EF4444",
-  success: "#10B981",
+  error: "#ec625d",
+  errorLight: "#faeeee",
+  success: "#8dc33b",
+  successLight: "#e9febe",
   warning: "#F59E0B",
 } as const;
 
@@ -42,6 +44,7 @@ export const borderRadius = {
   md: 12,
   lg: 16,
   xl: 20,
+  xxl: 32,
 } as const;
 
 export const fontSize = {

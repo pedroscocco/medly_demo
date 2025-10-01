@@ -12,6 +12,7 @@ export const styles = StyleSheet.create({
   bottomContainer: {
     padding: spacing.xxl,
     marginTop: "auto",
+    zIndex: 10,
   },
   checkButton: {
     flexDirection: "row",
@@ -20,12 +21,18 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.xl,
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xxl,
     ...shadows.large,
   },
   checkButtonDisabled: {
     backgroundColor: colors.gray200,
     ...shadows.none,
+  },
+  checkButtonCorrect: {
+    backgroundColor: colors.success,
+  },
+  checkButtonIncorrect: {
+    backgroundColor: colors.error,
   },
   checkButtonIcon: {
     fontSize: fontSize.lg,

@@ -4,6 +4,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import CheckButton from "../components/CheckButton";
 import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion";
 import QuestionHeader from "../components/QuestionHeader";
+import ResultFeedback from "../components/ResultFeedback";
 import SortQuestion from "../components/SortQuestion";
 import { useMarkQuestion } from "../hooks/useMarkQuestion";
 import useSessionQuery from "../hooks/useSessionQuery";
@@ -114,6 +115,7 @@ export default function () {
                     selectedAnswer={markingResult ? (markingResult.userAnswer as string) : selectedAnswer}
                     onSelectAnswer={setSelectedAnswer}
                     disabled={!!markingResult}
+                    markingResult={markingResult}
                 />
             ) : currentQuestion.questionData.questionType === "sort" ? (
                 <SortQuestion
@@ -136,26 +138,15 @@ export default function () {
                 </View>
             )}
 
-            {/* Temporary Result Display */}
-            {markingResult && (
-                <View style={styles.resultContainer}>
-                    <Text style={styles.resultScore}>
-                        Score: {markingResult.score}%
-                    </Text>
-                    <Text style={styles.resultFeedback}>
-                        {markingResult.feedback}
-                    </Text>
-                    <Text style={styles.resultDetails}>
-                        {markingResult.correctItems} / {markingResult.totalItems} correct
-                    </Text>
-                </View>
-            )}
+            {/* Result Feedback */}
+            {markingResult && <ResultFeedback markingResult={markingResult} />}
 
             <CheckButton
                 onPress={markingResult ? handleContinue : handleCheck}
                 disabled={!markingResult && !isCheckEnabled()}
                 text={markingResult ? "Continue" : "Check"}
                 loading={isMarking}
+                markingResult={markingResult}
             />
         </View>
     );
@@ -203,29 +194,5 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: fontSize.sm,
         color: colors.error,
-    },
-    resultContainer: {
-        marginHorizontal: 20,
-        marginBottom: 10,
-        padding: 16,
-        backgroundColor: colors.primaryLight,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.primary,
-    },
-    resultScore: {
-        fontSize: fontSize.lg,
-        fontWeight: "bold",
-        color: colors.primary,
-        marginBottom: 8,
-    },
-    resultFeedback: {
-        fontSize: fontSize.sm,
-        color: colors.black,
-        marginBottom: 4,
-    },
-    resultDetails: {
-        fontSize: fontSize.xs,
-        color: colors.gray500,
     },
 });

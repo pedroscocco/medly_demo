@@ -39,6 +39,14 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
     borderColor: colors.primary,
   },
+  optionButtonCorrect: {
+    backgroundColor: colors.successLight,
+    borderColor: colors.success,
+  },
+  optionButtonIncorrect: {
+    backgroundColor: colors.errorLight,
+    borderColor: colors.error,
+  },
   optionText: {
     fontSize: fontSize.sm,
     textAlign: "center",
