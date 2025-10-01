@@ -34,16 +34,21 @@ export const MOCK_QUESTION_STEPS: {steps: QuestionSpec[]} = {
       "heading": "What is the capital of Australia?",
       "description": "Australia's capital is often confused with its largest cities, but it's actually a planned city built specifically to serve as the capital.",
       "questionData": {
-        "questionType": "mcq",
+        "questionType": "sort",
         "options": [
           {"option": "Sydney"},
           {"option": "Melbourne"},
           {"option": "Canberra"},
           {"option": "Perth"}
         ],
-        "correctAnswer": "Canberra",
-        "categories": null,
-        "correct_answer_mapping": null
+        "correctAnswer": "Categorize by animal",
+        "categories": ["Coala", "Canguru", "Lizard", "Emu"],
+        "correct_answer_mapping": {
+          "Coala": ["Canberra"],
+          "Canguru": ["Sydney"],
+          "Lizard": ["Perth"],
+          "Emu": ["Melbourne"]
+        }
       }
     },
     {

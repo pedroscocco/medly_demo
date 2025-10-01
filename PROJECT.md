@@ -41,17 +41,23 @@ To help users practice and test their understanding of various topics through a 
 - ✅ Modular component architecture
   - QuestionHeader component (progress, navigation, badges)
   - MultipleChoiceQuestion component (question and options)
+  - SortQuestion component (tap-based categorization - temporary implementation)
   - CheckButton component (action button)
 - ✅ Practice flow screen with composable components
 - ✅ Progress tracking with visual progress bar
-- ✅ Question type routing (MCQ implemented)
+- ✅ Question type routing (MCQ and Sort implemented)
 - ✅ Design system with centralized style constants
 - ✅ Component-specific styling architecture
 - ✅ Session state management with Zustand actions
+- ✅ Sort question UI with tap-to-place interaction
+  - 2x2 category grid with dashed borders
+  - Tap items to select, tap categories to place
+  - Items can be repositioned between categories
+  - Check button enables when all items are placed
 
 ### In Progress
 - 🚧 Answer validation and feedback
-- 🚧 Sort question UI component
+- 🚧 Gesture-based drag-and-drop for sort questions (upgrade from tap-based)
 
 ### Not Started
 - ⏳ Short answer question UI component

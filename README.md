@@ -11,13 +11,17 @@ This app helps users practice and test their understanding of various topics thr
 - **Home Page**: Entry point with navigation to practice mode
 - **Practice Flow**: Interactive question interface with sequential progression
 - **Multiple Choice Questions**: Clean UI with selectable options and visual feedback
+- **Sort/Categorization Questions**: Tap-based sorting into categories (tap-to-place implementation)
+  - 2x2 category grid with dashed borders
+  - Tap items to select, tap categories to place
+  - Items can be repositioned between categories
 - **Progress Tracking**: Visual progress bar with step counter (e.g., 1/10)
 - **Question Navigation**: Sequential flow through question sets
 - **Offline Development**: Mock API for frontend development without backend dependency
 
 ### Planned Features
 - Answer validation with immediate feedback
-- Sort/categorization questions with drag-and-drop
+- Gesture-based drag-and-drop for sort questions (upgrade from tap-based)
 - Short answer questions with text input
 - Session completion summary
 
@@ -52,6 +56,7 @@ npm run web
 - **Component Architecture** (`src/components/`): Modular, reusable UI components
   - QuestionHeader: Progress bar, close button, and question type badge
   - MultipleChoiceQuestion: Question display and answer options
+  - SortQuestion: Category grid and tap-based item sorting (temporary tap implementation)
   - CheckButton: Bottom action button for answer submission
   - Composable design for flexible question flow assembly
 - **Design System** (`src/styles/`): Centralized style constants for consistent theming
@@ -76,6 +81,7 @@ src/
 ├── components/   # Modular, reusable UI components
 │   ├── QuestionHeader.tsx           # Progress bar and navigation
 │   ├── MultipleChoiceQuestion.tsx   # MCQ question content
+│   ├── SortQuestion.tsx             # Sort/categorization question
 │   └── CheckButton.tsx              # Answer submission button
 ├── hooks/        # React Query hooks
 ├── store/        # Zustand state management
@@ -83,6 +89,7 @@ src/
 │   ├── designSystem.ts              # Centralized style constants
 │   ├── QuestionHeader.styles.ts
 │   ├── MultipleChoiceQuestion.styles.ts
+│   ├── SortQuestion.styles.ts
 │   └── CheckButton.styles.ts
 └── types.ts      # TypeScript type definitions
 ```
