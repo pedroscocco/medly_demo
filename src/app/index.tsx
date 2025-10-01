@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import useSessionQuery from "../hooks/useSessionQuery";
@@ -7,10 +8,9 @@ import { styles } from "../styles/HomeScreen.styles";
 
 export default function Index() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useSessionQuery();
   const clearUserSession = useAppSessionStore((state) => state.clearUserSession);
-
-
 
   const currentUserStep = useAppSessionStore(
     (state) => state.currentUserStep
@@ -22,6 +22,11 @@ export default function Index() {
 
   const handleResetPractice = () => {
     clearUserSession();
+  };
+
+  const handleNewSession = () => {
+    clearUserSession();
+    queryClient.resetQueries({ queryKey: ['questions'] });
   };
 
   return (
@@ -55,6 +60,14 @@ export default function Index() {
       {/* Loaded State */}
       {!isLoading && !error && data && (
         <View style={styles.contentContainer}>
+          {/* New Session Button */}
+          <TouchableOpacity
+            style={styles.newSessionButton}
+            onPress={handleNewSession}
+          >
+            <Text style={styles.newSessionButtonText}>Generate New Session</Text>
+          </TouchableOpacity>
+
           {/* Stats Card */}
           <View style={styles.statsCard}>
             <Text style={styles.statsText}>Questions Available</Text>

@@ -103,4 +103,15 @@ export const styles = StyleSheet.create({
     color: colors.gray500,
     textAlign: "center",
   },
+  newSessionButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+  },
+  newSessionButtonText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.medium,
+    color: colors.primary,
+    textAlign: "center",
+    textDecorationLine: "underline",
+  },
 });

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
   MarkingResult,
-  QuestionSpec,
   McqAnswer,
-  SortAnswer,
   McqQuestionSpec,
+  QuestionSpec,
+  SortAnswer,
   SortQuestionSpec,
 } from "../types";
 
@@ -17,7 +17,7 @@ async function markQuestion(
   userAnswer: McqAnswer | SortAnswer
 ): Promise<MarkingResult> {
   // Simulate async operation (e.g., API call)
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   if (questionSpec.questionData.questionType === "mcq") {
     return markMcqQuestion(
