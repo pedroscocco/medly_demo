@@ -57,12 +57,27 @@ class ApiError extends Error {
 function sessions_questions(method: Method) {
     switch (method) {
         case 'GET':
-            return {
-                sessionId: 123,
-                steps: MOCK_QUESTION_STEPS.steps,
-            };
+            return createNewSession();
         default: throw new ApiError('400', 'Unsupported method');
     }
+}
+
+function createNewSession() {
+    const sessionStepsCount = 7 + Math.floor(Math.random() * 7);
+    
+    // random selection indexes from total pool of questions
+    const totalQuestions = MOCK_QUESTION_STEPS.steps.length;
+    const selectedIndexes = new Set<number>();
+    while (selectedIndexes.size < sessionStepsCount) {
+        selectedIndexes.add(Math.floor(Math.random() * totalQuestions));
+    }
+
+    const selectedQuestionSteps = Array.from(selectedIndexes).map((index, i) => ({...(MOCK_QUESTION_STEPS.steps[index]), index: i}));
+
+    return {
+        sessionId: Math.random().toString(36).substring(2, 15),
+        steps: selectedQuestionSteps,
+    };
 }
 
 type SessionCompleteParams = {

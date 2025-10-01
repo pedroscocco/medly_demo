@@ -6,7 +6,7 @@ import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion";
 import QuestionHeader from "../components/QuestionHeader";
 import SortQuestion from "../components/SortQuestion";
 import { useMarkQuestion } from "../hooks/useMarkQuestion";
-import useSessionQuery from "../hooks/useSessioQuery";
+import useSessionQuery from "../hooks/useSessionQuery";
 import { useAppSessionStore } from "../store/useAppSessionStore";
 import { colors, fontSize } from "../styles/designSystem";
 import { SortQuestionSpec } from "../types";
@@ -23,15 +23,15 @@ export default function () {
     const { markingResult, isMarking, markAnswer, resetMarking } =
         useMarkQuestion();
 
-    const currentSessionStep = useAppSessionStore(
-        (state) => state.currentSessionStep
-    );
+    const currentUserStep = useAppSessionStore(
+        (state) => state.currentUserStep
+    ) || 0;
     const setNextStep = useAppSessionStore((state) => state.setNextStep);
-    const setCurrentSessionStep = useAppSessionStore(
-        (state) => state.setCurrentSessionStep
+    const setCurrentUserStep = useAppSessionStore(
+        (state) => state.setCurrentUserStep
     );
 
-    const currentQuestion = fullQuestionStepsList[currentSessionStep];
+    const currentQuestion = fullQuestionStepsList[currentUserStep];
 
     const edgeCaseView = renderEdgeCase(isLoading, error, currentQuestion);
     if (edgeCaseView) {
@@ -49,14 +49,14 @@ export default function () {
 
     const handleContinue = () => {
         // Move to next question after seeing results
-        if (currentSessionStep < fullQuestionStepsList.length - 1) {
+        if (currentUserStep < fullQuestionStepsList.length - 1) {
             setNextStep();
             setSelectedAnswer(null); // Reset selection for next question
             setSortAnswer({}); // Reset sort answer
             resetMarking(); // Reset marking result
         } else {
             // Finished all questions, go back to home
-            setCurrentSessionStep(0);
+            setCurrentUserStep(null);
             router.push("/" as any);
         }
     };
@@ -98,7 +98,7 @@ export default function () {
     return (
         <View style={styles.container}>
             <QuestionHeader
-                currentStep={currentSessionStep}
+                currentStep={currentUserStep}
                 totalSteps={fullQuestionStepsList.length}
                 questionType={getQuestionTypeLabel()}
                 onClose={handleClose}

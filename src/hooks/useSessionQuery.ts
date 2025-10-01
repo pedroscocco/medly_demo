@@ -12,5 +12,7 @@ export default function useSessionQuery() {
             }
             throw new Error(response.error || 'Failed to fetch questions');
         },
+        staleTime: Infinity,
+        gcTime: Infinity,
     });
 }

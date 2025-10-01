@@ -1,31 +1,29 @@
 import { create } from 'zustand';
 
 interface AppState {
-  currentSessionStep: number;
+  currentUserStep: number | null;
 }
 
 interface AppActions {
   setNextStep: () => void;
-  setCurrentSessionStep: (sessionStep: number) => void;
-  clearSession: () => void;
+  setCurrentUserStep: (sessionStep: number | null) => void;
+  clearUserSession: () => void;
 }
 
 export const useAppSessionStore = create<AppState & AppActions>((set) => ({
   // State
-  currentSessionStep: 0,
-
+  currentUserStep: 0,
   // Actions
   setNextStep: () =>
     set((state) => ({
-      currentSessionStep: state.currentSessionStep + 1,
+      currentUserStep: (state.currentUserStep || 0) + 1,
     })),
-  setCurrentSessionStep: (sessionStep: number) =>
+  setCurrentUserStep: (sessionStep: number | null) =>
     set({
-      currentSessionStep: sessionStep,
+      currentUserStep: sessionStep,
     }),
-
-  clearSession: () =>
+  clearUserSession: () =>
     set({
-      currentSessionStep: 0,
+      currentUserStep: null,
     }),
 }));

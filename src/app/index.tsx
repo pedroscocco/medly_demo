@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import useSessionQuery from "../hooks/useSessioQuery";
+import useSessionQuery from "../hooks/useSessionQuery";
 import { useAppSessionStore } from "../store/useAppSessionStore";
 import { colors } from "../styles/designSystem";
 import { styles } from "../styles/HomeScreen.styles";
@@ -8,9 +8,12 @@ import { styles } from "../styles/HomeScreen.styles";
 export default function Index() {
   const router = useRouter();
   const { data, isLoading, error } = useSessionQuery();
-  const clearSession = useAppSessionStore((state) => state.clearSession);
-  const currentSessionStep = useAppSessionStore(
-    (state) => state.currentSessionStep
+  const clearUserSession = useAppSessionStore((state) => state.clearUserSession);
+
+
+
+  const currentUserStep = useAppSessionStore(
+    (state) => state.currentUserStep
   );
 
   const handleStartPractice = () => {
@@ -18,7 +21,7 @@ export default function Index() {
   };
 
   const handleResetPractice = () => {
-    clearSession();
+    clearUserSession();
   };
 
   return (
@@ -58,11 +61,12 @@ export default function Index() {
             <Text style={styles.statsNumber}>{data.steps.length}</Text>
           </View>
 
-          {currentSessionStep > 0 && (
+          {/* Show progress only if user has started a session */}
+          {currentUserStep !== null && (
             <View style={styles.statsCard}>
               <Text style={styles.statsText}>Current Progress</Text>
               <Text style={styles.statsNumber}>
-                {currentSessionStep} / {data.steps.length}
+                {currentUserStep} / {data.steps.length}
               </Text>
             </View>
           )}
@@ -74,11 +78,12 @@ export default function Index() {
               onPress={handleStartPractice}
             >
               <Text style={styles.primaryButtonText}>
-                {currentSessionStep > 0 ? "Continue Practice" : "Start Practice"}
+                {currentUserStep !== null ? "Continue Practice" : "Start Practice"}
               </Text>
             </TouchableOpacity>
 
-            {currentSessionStep > 0 && (
+            {/* Allow reset only if user has started a session */}
+            {currentUserStep !== null && (
               <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={handleResetPractice}

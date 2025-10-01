@@ -31,7 +31,7 @@ export const MOCK_QUESTION_STEPS: {steps: QuestionSpec[]} = {
     {
       "index": 1,
       "title": "Geography",
-      "heading": "What is the capital of Australia?",
+      "heading": "Categorize these cities by their respective animal.",
       "description": "Australia's capital is often confused with its largest cities, but it's actually a planned city built specifically to serve as the capital.",
       "questionData": {
         "questionType": "sort",
