@@ -2,7 +2,7 @@ import { QuestionSpec } from "../types";
 
 export const MOCK_USER_DATA = {
     id: '3213', 
-    email: 'pedroscocco@gmail.com', 
+    email: 'p', 
     totalSessions: 123, 
     currentStreak: 123, 
     accuracyPercentage: 87.5

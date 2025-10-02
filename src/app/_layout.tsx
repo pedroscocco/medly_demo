@@ -16,7 +16,6 @@ export default function RootLayout() {
 
 const RootNavigator = () => {
   const { authSession } = useAuthSession();
-  console.log('authSession in RootNavigator:', authSession);
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!authSession}>

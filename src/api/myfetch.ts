@@ -10,18 +10,20 @@ type User = {
     accuracyPercentage: number;
 };
 
-// Pre-populate with mock user
-const users: User[] = [
-    {
+// Hash map of users by ID
+const usersById: { [id: string]: User } = {
+    [MOCK_USER_DATA.id]: {
         id: MOCK_USER_DATA.id,
         email: MOCK_USER_DATA.email,
-        password: 'password', // Default password for mock user
+        password: '123', // Default password for mock user
         totalSessions: MOCK_USER_DATA.totalSessions,
         currentStreak: MOCK_USER_DATA.currentStreak,
         accuracyPercentage: MOCK_USER_DATA.accuracyPercentage
     }
-];
+};
+
 let nextUserId = 3214; // Start after mock user ID
+let currentSignedInUserId: string | null = null;
 
 type Method = 'GET' | 'POST';
 
@@ -57,6 +59,11 @@ export default async function myfetch(path: string, method: Method = 'GET', para
                     code: '200',
                     data: auth_signup(method, params)
                 };
+            case '/currentUser':
+                return {
+                    code: '200',
+                    data: get_current_user(method)
+                };
             default: return { code: '400', error: 'Unknown endpoint' };
         }
     } catch (error) {
@@ -84,7 +91,7 @@ function sessions_questions(method: Method) {
 }
 
 function createNewSession() {
-    const sessionStepsCount = 7 + Math.floor(Math.random() * 7);
+    const sessionStepsCount = 1 + Math.floor(Math.random() * 7);
     
     // random selection indexes from total pool of questions
     const totalQuestions = MOCK_QUESTION_STEPS.steps.length;
@@ -124,7 +131,7 @@ function auth_login(method: string, params: { email: string, password: string })
     switch (method) {
         case 'POST':
             // Find user by email
-            const user = users.find(u => u.email === params.email);
+            const user = Object.values(usersById).find(u => u.email === params.email);
 
             if (!user) {
                 throw new ApiError('400', 'User not found');
@@ -133,6 +140,9 @@ function auth_login(method: string, params: { email: string, password: string })
             if (user.password !== params.password) {
                 throw new ApiError('400', 'Invalid password');
             }
+
+            // Store signed-in user ID
+            currentSignedInUserId = user.id;
 
             // Return user data without password
             const { password, ...userData } = user;
@@ -148,7 +158,7 @@ function auth_signup(method: string, params: { email: string, password: string }
     switch (method) {
         case 'POST':
             // Check if user already exists
-            if (users.find(u => u.email === params.email)) {
+            if (Object.values(usersById).find(u => u.email === params.email)) {
                 throw new ApiError('400', 'Email already registered');
             }
 
@@ -162,7 +172,11 @@ function auth_signup(method: string, params: { email: string, password: string }
                 accuracyPercentage: 0
             };
 
-            users.push(newUser);
+            // Add to hash map
+            usersById[newUser.id] = newUser;
+
+            // Store signed-in user ID
+            currentSignedInUserId = newUser.id;
 
             // Return user data without password
             const { password, ...userData } = newUser;
@@ -170,6 +184,25 @@ function auth_signup(method: string, params: { email: string, password: string }
                 user: userData,
                 token: Math.random().toString(36).substring(2, 15)
             };
+        default: throw new ApiError('400', 'Unsupported method');
+    }
+}
+
+function get_current_user(method: Method) {
+    switch (method) {
+        case 'GET':
+            if (!currentSignedInUserId) {
+                throw new ApiError('400', 'No user signed in');
+            }
+
+            const user = usersById[currentSignedInUserId];
+            if (!user) {
+                throw new ApiError('400', 'User not found');
+            }
+
+            // Return user data without password
+            const { password, ...userData } = user;
+            return userData;
         default: throw new ApiError('400', 'Unsupported method');
     }
 }

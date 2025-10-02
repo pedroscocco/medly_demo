@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createContext, type PropsWithChildren, use } from 'react';
 import myfetch from '../api/myfetch';
 import { useSecureStoreState } from '../hooks/useSecureStoreState';
@@ -36,6 +36,7 @@ export function useAuthSession() {
 }
 
 export function AuthSessionProvider({ children }: PropsWithChildren) {
+  const queryClient = useQueryClient();
   const [[isLoading, authSession], setAuthSession] = useSecureStoreState('authSession');
   const signinMutation = useMutation({
     mutationFn: async (params: {isSignUp: boolean, userCredentials: UserCredentials}) => {
@@ -46,9 +47,13 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
       }
       throw new Error(response.error || 'Failed to log in');
     },
-    onSettled: (data, error, variables, context) => {
+    onSettled: (data) => {
       if (data?.token) {
         setAuthSession(data.token);
+      }
+      if (data?.user) {
+        queryClient.setQueryData(['currentUser'], data.user);
+        queryClient.invalidateQueries({ queryKey: ['currentUser']});
       }
     }
   });

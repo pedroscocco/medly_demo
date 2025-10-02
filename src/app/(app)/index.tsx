@@ -24,10 +24,10 @@ export default function Index() {
   const completedQuestionsCount = Object.keys(markingResults).length;
 
   const handleStartPractice = () => {
+    router.push("./practice-flow");
     if (currentUserStep === null) {
       setCurrentUserStep(0); // Start from the first question
     }
-    router.push("./practice-flow");
   };
 
   const handleResetPractice = () => {
