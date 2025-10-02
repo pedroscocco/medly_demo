@@ -50,6 +50,11 @@ export default function Index() {
         </Text>
       </View>
 
+      {/* Fox Emoji */}
+      <View style={styles.homescreenEmojiContainer}>
+        <Text style={styles.homescreenEmoji}>🦊</Text>
+      </View>
+
       {/* Loading State */}
       {isLoading && (
         <View style={styles.centerContainer}>

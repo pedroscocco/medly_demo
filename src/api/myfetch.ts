@@ -91,7 +91,7 @@ function sessions_questions(method: Method) {
 }
 
 function createNewSession() {
-    const sessionStepsCount = 1 + Math.floor(Math.random() * 7);
+    const sessionStepsCount = 3 + Math.floor(Math.random() * 5); // 3 to 7 questions
     
     // random selection indexes from total pool of questions
     const totalQuestions = MOCK_QUESTION_STEPS.steps.length;

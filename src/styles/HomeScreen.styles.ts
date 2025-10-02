@@ -31,6 +31,13 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
+  homescreenEmojiContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  homescreenEmoji: {
+    fontSize: 120,
+  },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
@@ -52,6 +59,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: spacing.xxl,
+    paddingBottom: spacing.huge,
   },
   statsCard: {
     backgroundColor: colors.gray50,
