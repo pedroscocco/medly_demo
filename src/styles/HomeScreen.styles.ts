@@ -114,4 +114,16 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     textDecorationLine: "underline",
   },
+  signOutButton: {
+    position: "absolute",
+    bottom: spacing.xxl,
+    left: spacing.xxl,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  signOutText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.medium,
+    color: colors.gray400,
+  },
 });

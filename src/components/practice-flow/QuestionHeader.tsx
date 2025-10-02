@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import { styles } from "../styles/QuestionHeader.styles";
+import { Text, TouchableOpacity, View } from "react-native";
+import { styles } from "../../styles/practice-flow/QuestionHeader.styles";
 
 interface QuestionHeaderProps {
   currentStep: number;

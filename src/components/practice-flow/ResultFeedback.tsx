@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
-import { colors } from "../styles/designSystem";
-import { styles } from "../styles/ResultFeedback.styles";
-import { MarkingResult } from "../types";
+import { colors } from "../../styles/designSystem";
+import { styles } from "../../styles/practice-flow/ResultFeedback.styles";
+import { MarkingResult } from "../../types";
 
 interface ResultFeedbackProps {
   markingResult: MarkingResult;

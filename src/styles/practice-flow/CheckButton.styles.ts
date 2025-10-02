@@ -6,7 +6,7 @@ import {
   fontWeight,
   shadows,
   spacing,
-} from "./designSystem";
+} from "../designSystem";
 
 export const styles = StyleSheet.create({
   bottomContainer: {

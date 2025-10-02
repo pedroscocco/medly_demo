@@ -1,16 +1,16 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import CheckButton from "../components/CheckButton";
-import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion";
-import QuestionHeader from "../components/QuestionHeader";
-import ResultFeedback from "../components/ResultFeedback";
-import SortQuestion from "../components/SortQuestion";
-import { useMarkQuestion } from "../hooks/useMarkQuestion";
-import useSessionQuery from "../hooks/useSessionQuery";
-import { useAppSessionStore } from "../store/useAppSessionStore";
-import { colors, fontSize } from "../styles/designSystem";
-import { SortQuestionSpec } from "../types";
+import CheckButton from "../../components/practice-flow/CheckButton";
+import MultipleChoiceQuestion from "../../components/practice-flow/MultipleChoiceQuestion";
+import QuestionHeader from "../../components/practice-flow/QuestionHeader";
+import ResultFeedback from "../../components/practice-flow/ResultFeedback";
+import SortQuestion from "../../components/practice-flow/SortQuestion";
+import { useMarkQuestion } from "../../hooks/useMarkQuestion";
+import useSessionQuery from "../../hooks/useSessionQuery";
+import { useAppSessionStore } from "../../store/useAppSessionStore";
+import { colors, fontSize } from "../../styles/designSystem";
+import { SortQuestionSpec } from "../../types";
 
 export default function () {
     const router = useRouter();

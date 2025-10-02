@@ -1,6 +1,27 @@
 import { MOCK_QUESTION_STEPS, MOCK_USER_DATA } from "./mock_data";
 
+// In-memory user storage
+type User = {
+    id: string;
+    email: string;
+    password: string;
+    totalSessions: number;
+    currentStreak: number;
+    accuracyPercentage: number;
+};
 
+// Pre-populate with mock user
+const users: User[] = [
+    {
+        id: MOCK_USER_DATA.id,
+        email: MOCK_USER_DATA.email,
+        password: 'password', // Default password for mock user
+        totalSessions: MOCK_USER_DATA.totalSessions,
+        currentStreak: MOCK_USER_DATA.currentStreak,
+        accuracyPercentage: MOCK_USER_DATA.accuracyPercentage
+    }
+];
+let nextUserId = 3214; // Start after mock user ID
 
 type Method = 'GET' | 'POST';
 
@@ -102,9 +123,22 @@ function sessions_complete(method: Method, params: SessionCompleteParams) {
 function auth_login(method: string, params: { email: string, password: string }) {
     switch (method) {
         case 'POST':
+            // Find user by email
+            const user = users.find(u => u.email === params.email);
+
+            if (!user) {
+                throw new ApiError('400', 'User not found');
+            }
+
+            if (user.password !== params.password) {
+                throw new ApiError('400', 'Invalid password');
+            }
+
+            // Return user data without password
+            const { password, ...userData } = user;
             return {
-                user: MOCK_USER_DATA,
-                token: 'mock-token-123'
+                user: userData,
+                token: Math.random().toString(36).substring(2, 15)
             };
         default: throw new ApiError('400', 'Unsupported method');
     }
@@ -113,9 +147,28 @@ function auth_login(method: string, params: { email: string, password: string })
 function auth_signup(method: string, params: { email: string, password: string }) {
     switch (method) {
         case 'POST':
+            // Check if user already exists
+            if (users.find(u => u.email === params.email)) {
+                throw new ApiError('400', 'Email already registered');
+            }
+
+            // Create new user
+            const newUser: User = {
+                id: String(nextUserId++),
+                email: params.email,
+                password: params.password,
+                totalSessions: 0,
+                currentStreak: 0,
+                accuracyPercentage: 0
+            };
+
+            users.push(newUser);
+
+            // Return user data without password
+            const { password, ...userData } = newUser;
             return {
-                user: MOCK_USER_DATA,
-                token: 'mock-token-123'
+                user: userData,
+                token: Math.random().toString(36).substring(2, 15)
             };
         default: throw new ApiError('400', 'Unsupported method');
     }

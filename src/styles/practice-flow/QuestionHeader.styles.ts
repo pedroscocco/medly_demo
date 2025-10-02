@@ -8,7 +8,7 @@ import {
   iconSizes,
   progressBarHeight,
   spacing,
-} from "./designSystem";
+} from "../designSystem";
 
 export const styles = StyleSheet.create({
   header: {

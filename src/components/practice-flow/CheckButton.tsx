@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-import { colors } from "../styles/designSystem";
-import { styles } from "../styles/CheckButton.styles";
-import { Svg, Path } from "react-native-svg";
-import { MarkingResult } from "../types";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { Path, Svg } from "react-native-svg";
+import { colors } from "../../styles/designSystem";
+import { styles } from "../../styles/practice-flow/CheckButton.styles";
+import { MarkingResult } from "../../types";
 
 interface CheckButtonProps {
   onPress: () => void;

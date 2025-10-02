@@ -1,12 +1,14 @@
+import { useAuthSession } from "@/src/authentication/AuthSessionProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import useSessionQuery from "../hooks/useSessionQuery";
-import { useAppSessionStore } from "../store/useAppSessionStore";
-import { colors } from "../styles/designSystem";
-import { styles } from "../styles/HomeScreen.styles";
+import useSessionQuery from "../../hooks/useSessionQuery";
+import { useAppSessionStore } from "../../store/useAppSessionStore";
+import { colors } from "../../styles/designSystem";
+import { styles } from "../../styles/HomeScreen.styles";
 
 export default function Index() {
+  const { signOut } = useAuthSession();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useSessionQuery();
@@ -117,6 +119,16 @@ export default function Index() {
           </View>
         </View>
       )}
+
+      {/* Sign Out Button - Bottom Left */}
+      <TouchableOpacity
+        style={styles.signOutButton}
+        onPress={() => {
+          signOut();
+        }}
+      >
+        <Text style={styles.signOutText}>Sign Out</Text>
+      </TouchableOpacity>
     </View>
   );
 }

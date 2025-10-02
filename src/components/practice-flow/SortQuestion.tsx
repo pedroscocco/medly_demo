@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { AnswerOption } from "../types";
-import { styles } from "../styles/SortQuestion.styles";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { styles } from "../../styles/practice-flow/SortQuestion.styles";
+import { AnswerOption } from "../../types";
 
 interface SortQuestionProps {
   heading: string;

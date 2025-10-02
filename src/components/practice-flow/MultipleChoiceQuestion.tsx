@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import { AnswerOption, MarkingResult } from "../types";
-import { styles } from "../styles/MultipleChoiceQuestion.styles";
+import { Text, TouchableOpacity, View } from "react-native";
+import { styles } from "../../styles/practice-flow/MultipleChoiceQuestion.styles";
+import { AnswerOption, MarkingResult } from "../../types";
 
 interface MultipleChoiceQuestionProps {
   heading: string;
