@@ -68,6 +68,7 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
           signinMutation.mutate({isSignUp: false, userCredentials});
         },
         signOut: () => {
+          queryClient.removeQueries({ queryKey: ['currentUser']});
           setAuthSession(null);
         },
         authSession: authSession ? { token: authSession } : null,
