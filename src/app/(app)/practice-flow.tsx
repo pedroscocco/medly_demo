@@ -1,6 +1,8 @@
+import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import CheckButton from "../../components/practice-flow/CheckButton";
 import MultipleChoiceQuestion from "../../components/practice-flow/MultipleChoiceQuestion";
 import QuestionHeader from "../../components/practice-flow/QuestionHeader";
@@ -9,7 +11,7 @@ import SortQuestion from "../../components/practice-flow/SortQuestion";
 import { useMarkQuestion } from "../../hooks/useMarkQuestion";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
-import { colors, fontSize } from "../../styles/designSystem";
+import { colors } from "../../styles/designSystem";
 import { SortQuestionSpec } from "../../types";
 
 export default function PracticeScreen() {
@@ -98,7 +100,7 @@ export default function PracticeScreen() {
 
   // Render based on question type
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.screenContainer}>
       <QuestionHeader
         currentStep={currentUserStep}
         totalSteps={fullQuestionStepsList.length}
@@ -153,7 +155,7 @@ export default function PracticeScreen() {
         loading={isMarking}
         markingResult={markingResult}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -188,20 +190,3 @@ function renderEdgeCase(
 
   return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-    paddingTop: 50,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.error,
-  },
-});

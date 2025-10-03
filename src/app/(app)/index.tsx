@@ -2,6 +2,7 @@ import { useAuthSession } from "@/src/authentication/AuthSessionProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
@@ -40,7 +41,7 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Medly Practice</Text>
@@ -136,6 +137,6 @@ export default function Index() {
       >
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }

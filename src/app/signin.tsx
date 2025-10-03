@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthSession } from "../authentication/AuthSessionProvider";
 import { styles } from "../styles/SignIn.styles";
 import { colors } from "../styles/designSystem";
@@ -32,7 +33,7 @@ export default function SignIn() {
   const isSignInMode = mode === "signin";
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Medly Practice</Text>
@@ -126,6 +127,6 @@ export default function SignIn() {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
