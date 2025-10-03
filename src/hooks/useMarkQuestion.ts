@@ -45,7 +45,7 @@ async function markQuestion(
 /**
  * Mark a multiple choice question
  */
-function markMcqQuestion(
+export function markMcqQuestion(
   questionSpec: McqQuestionSpec,
   userAnswer: McqAnswer
 ): MarkingResult {
