@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useReducer } from 'react';
-import SecureStorageUtil from '../utils/SecureStorage';
+import { useCallback, useEffect, useReducer } from "react";
+import SecureStorageUtil from "../utils/SecureStorage";
 
 type AsyncState<T> = [boolean, T | null];
 
@@ -12,8 +12,11 @@ function useAsyncLoadingState<T>(
   initialValue: [boolean, T | null] = [true, null],
 ): UseAsyncStateHook<T> {
   return useReducer(
-    (state: [boolean, T | null], action: T | null = null): [boolean, T | null] => [false, action],
-    initialValue
+    (
+      state: [boolean, T | null],
+      action: T | null = null,
+    ): [boolean, T | null] => [false, action],
+    initialValue,
   ) as UseAsyncStateHook<T>;
 }
 
@@ -23,10 +26,10 @@ export function useSecureStoreState(key: string): UseAsyncStateHook<string> {
 
   // Get
   useEffect(() => {
-    SecureStorageUtil.getItemAsync(key).then(value => {
+    SecureStorageUtil.getItemAsync(key).then((value) => {
       setAsyncState(value);
     });
-  }, [key]);
+  }, [key, setAsyncState]);
 
   // Set
   const setValue = useCallback(
@@ -34,7 +37,7 @@ export function useSecureStoreState(key: string): UseAsyncStateHook<string> {
       setAsyncState(value);
       SecureStorageUtil.setItemAsync(key, value);
     },
-    [key]
+    [key, setAsyncState],
   );
 
   return [asyncLoadingState, setValue];

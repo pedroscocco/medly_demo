@@ -12,13 +12,13 @@ export default function Index() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useSessionQuery();
-  const clearUserSession = useAppSessionStore((state) => state.clearUserSession);
-
-  const currentUserStep = useAppSessionStore(
-    (state) => state.currentUserStep
+  const clearUserSession = useAppSessionStore(
+    (state) => state.clearUserSession,
   );
+
+  const currentUserStep = useAppSessionStore((state) => state.currentUserStep);
   const setCurrentUserStep = useAppSessionStore(
-    (state) => state.setCurrentUserStep
+    (state) => state.setCurrentUserStep,
   );
   const markingResults = useAppSessionStore((state) => state.markingResults);
   const completedQuestionsCount = Object.keys(markingResults).length;
@@ -36,7 +36,7 @@ export default function Index() {
 
   const handleNewSession = () => {
     clearUserSession();
-    queryClient.resetQueries({ queryKey: ['questions'] });
+    queryClient.resetQueries({ queryKey: ["questions"] });
   };
 
   return (
@@ -80,7 +80,9 @@ export default function Index() {
             style={styles.newSessionButton}
             onPress={handleNewSession}
           >
-            <Text style={styles.newSessionButtonText}>Generate New Session</Text>
+            <Text style={styles.newSessionButtonText}>
+              Generate New Session
+            </Text>
           </TouchableOpacity>
 
           {/* Stats Card */}
@@ -106,7 +108,9 @@ export default function Index() {
               onPress={handleStartPractice}
             >
               <Text style={styles.primaryButtonText}>
-                {currentUserStep !== null ? "Continue Practice" : "Start Practice"}
+                {currentUserStep !== null
+                  ? "Continue Practice"
+                  : "Start Practice"}
               </Text>
             </TouchableOpacity>
 
@@ -116,9 +120,7 @@ export default function Index() {
                 style={styles.secondaryButton}
                 onPress={handleResetPractice}
               >
-                <Text style={styles.secondaryButtonText}>
-                  Restart Practice
-                </Text>
+                <Text style={styles.secondaryButtonText}>Restart Practice</Text>
               </TouchableOpacity>
             )}
           </View>

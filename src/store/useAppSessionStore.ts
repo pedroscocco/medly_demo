@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { MarkingResult } from '../types';
+import { create } from "zustand";
+import { MarkingResult } from "../types";
 
 interface AppState {
   currentUserStep: number | null;

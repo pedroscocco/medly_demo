@@ -22,7 +22,9 @@ export default function SortQuestion({
 }: SortQuestionProps) {
   // Calculate unassigned items based on currentAnswer
   const placedItems = Object.values(currentAnswer).flat();
-  const unassignedItems = options.map((opt) => opt.option).filter((item) => !placedItems.includes(item));
+  const unassignedItems = options
+    .map((opt) => opt.option)
+    .filter((item) => !placedItems.includes(item));
 
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
@@ -43,7 +45,7 @@ export default function SortQuestion({
     // Check if item is already in a category, remove it from there
     Object.keys(newCategoryItems).forEach((cat) => {
       newCategoryItems[cat] = newCategoryItems[cat].filter(
-        (i) => i !== selectedItem
+        (i) => i !== selectedItem,
       );
     });
 

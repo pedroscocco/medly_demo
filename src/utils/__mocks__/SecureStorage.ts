@@ -20,7 +20,7 @@ const SecureStorageUtil = {
 
   // Test helper to clear all storage
   clearAll() {
-    Object.keys(storage).forEach(key => delete storage[key]);
+    Object.keys(storage).forEach((key) => delete storage[key]);
   },
 };
 

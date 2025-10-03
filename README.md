@@ -20,6 +20,7 @@ This app helps users practice and test their understanding of various topics thr
 - **Offline Development**: Mock API for frontend development without backend dependency
 
 ### Planned Features
+
 - Answer validation with immediate feedback
 - Gesture-based drag-and-drop for sort questions (upgrade from tap-based)
 - Short answer questions with text input

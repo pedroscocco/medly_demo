@@ -1,12 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook, waitFor } from '@testing-library/react-native';
-import { AuthSessionProvider, useAuthSession } from '../AuthSessionProvider';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
+import { AuthSessionProvider, useAuthSession } from "../AuthSessionProvider";
 
 // Mock SecureStorage to avoid async state updates
-jest.mock('../../utils/SecureStorage');
+jest.mock("../../utils/SecureStorage");
 
-describe('AuthSessionProvider', () => {
-  it('provides authentication context', async () => {
+describe("AuthSessionProvider", () => {
+  it("provides authentication context", async () => {
     const queryClient = new QueryClient();
 
     const { result } = renderHook(() => useAuthSession(), {
@@ -28,7 +28,7 @@ describe('AuthSessionProvider', () => {
     expect(result.current.authSession).toBeDefined();
   });
 
-  it('starts with loading state and then finishes loading', async () => {
+  it("starts with loading state and then finishes loading", async () => {
     const queryClient = new QueryClient();
 
     const { result } = renderHook(() => useAuthSession(), {
@@ -47,7 +47,7 @@ describe('AuthSessionProvider', () => {
     });
   });
 
-  it('signOut clears auth session', async () => {
+  it("signOut clears auth session", async () => {
     const queryClient = new QueryClient();
 
     const { result } = renderHook(() => useAuthSession(), {

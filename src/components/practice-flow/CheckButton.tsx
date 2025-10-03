@@ -41,7 +41,8 @@ export default function CheckButton({
   const getButtonStyle = () => {
     if (disabled) return styles.checkButtonDisabled;
     if (markingResult?.isCorrect) return styles.checkButtonCorrect;
-    if (markingResult && !markingResult.isCorrect) return styles.checkButtonIncorrect;
+    if (markingResult && !markingResult.isCorrect)
+      return styles.checkButtonIncorrect;
     return null;
   };
 

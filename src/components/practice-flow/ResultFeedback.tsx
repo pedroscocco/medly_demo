@@ -12,15 +12,27 @@ export default function ResultFeedback({ markingResult }: ResultFeedbackProps) {
   const { isCorrect, score } = markingResult;
 
   return (
-    <View style={[styles.container, isCorrect ? styles.containerCorrect : styles.containerIncorrect]}>
+    <View
+      style={[
+        styles.container,
+        isCorrect ? styles.containerCorrect : styles.containerIncorrect,
+      ]}
+    >
       <View style={styles.leftSection}>
-          <Ionicons
-            name={isCorrect ? "checkmark-circle" : "close-circle-sharp"}
-            size={24}
-            color={isCorrect ? colors.success : colors.error}
-          />
-        <Text style={[styles.text, isCorrect ? styles.textCorrect : styles.textIncorrect]}>
-          {isCorrect ? `+${score} mark${score > 1 ? 's' : ''}` : `${score} mark${score > 1 ? 's' : ''}`}
+        <Ionicons
+          name={isCorrect ? "checkmark-circle" : "close-circle-sharp"}
+          size={24}
+          color={isCorrect ? colors.success : colors.error}
+        />
+        <Text
+          style={[
+            styles.text,
+            isCorrect ? styles.textCorrect : styles.textIncorrect,
+          ]}
+        >
+          {isCorrect
+            ? `+${score} mark${score > 1 ? "s" : ""}`
+            : `${score} mark${score > 1 ? "s" : ""}`}
         </Text>
       </View>
     </View>

@@ -1,27 +1,23 @@
-import { markMcqQuestion } from '../useMarkQuestion';
-import { McqQuestionSpec, McqAnswer } from '../../types';
+import { McqAnswer, McqQuestionSpec } from "../../types";
+import { markMcqQuestion } from "../useMarkQuestion";
 
-describe('markMcqQuestion', () => {
+describe("markMcqQuestion", () => {
   const questionSpec: McqQuestionSpec = {
     index: 0,
-    title: 'Test Question',
-    heading: 'What is 2+2?',
-    description: 'Simple math',
+    title: "Test Question",
+    heading: "What is 2+2?",
+    description: "Simple math",
     questionData: {
-      questionType: 'mcq',
-      options: [
-        { option: '3' },
-        { option: '4' },
-        { option: '5' }
-      ],
-      correctAnswer: '4',
+      questionType: "mcq",
+      options: [{ option: "3" }, { option: "4" }, { option: "5" }],
+      correctAnswer: "4",
       categories: null,
       correct_answer_mapping: null,
     },
   };
 
-  it('returns correct=true when answer matches', () => {
-    const userAnswer: McqAnswer = '4';
+  it("returns correct=true when answer matches", () => {
+    const userAnswer: McqAnswer = "4";
     const result = markMcqQuestion(questionSpec, userAnswer);
 
     expect(result.isCorrect).toBe(true);
@@ -30,14 +26,14 @@ describe('markMcqQuestion', () => {
     expect(result.totalItems).toBe(1);
   });
 
-  it('returns correct=false when answer does not match', () => {
-    const userAnswer: McqAnswer = '3';
+  it("returns correct=false when answer does not match", () => {
+    const userAnswer: McqAnswer = "3";
     const result = markMcqQuestion(questionSpec, userAnswer);
 
     expect(result.isCorrect).toBe(false);
     expect(result.score).toBe(0);
     expect(result.correctItems).toBe(0);
     expect(result.totalItems).toBe(1);
-    expect(result.feedback).toContain('Incorrect');
+    expect(result.feedback).toContain("Incorrect");
   });
 });

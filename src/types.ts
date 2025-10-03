@@ -1,20 +1,18 @@
 export type MCQ_TYPE = "mcq";
-const MCQ_TYPE_V: MCQ_TYPE = "mcq";
-export type SORT_TYPE = "sort"
-const SORT_TYPE_V:SORT_TYPE  = "sort";
+export type SORT_TYPE = "sort";
 
 export type UserData = {
-    id: string, 
-    email: string, 
-    totalSessions: number, 
-    currentStreak: number, 
-    accuracyPercentage: number
-}
+  id: string;
+  email: string;
+  totalSessions: number;
+  currentStreak: number;
+  accuracyPercentage: number;
+};
 
 export type Session = {
-  sessionId: number,
-  steps: QuestionSpec[],
-}
+  sessionId: number;
+  steps: QuestionSpec[];
+};
 
 export type McqQuestionSpec = {
   index: number;
@@ -41,7 +39,7 @@ export type SortQuestionSpec = {
     correctAnswer: string;
     categories: string[];
     correct_answer_mapping: {
-      [key: string]: string[]
+      [key: string]: string[];
     };
   };
 };
@@ -49,8 +47,8 @@ export type SortQuestionSpec = {
 export type QuestionSpec = McqQuestionSpec | SortQuestionSpec;
 
 export type AnswerOption = {
-  option: string
-}
+  option: string;
+};
 
 // Marking/Scoring Types
 export type McqAnswer = string;

@@ -1,6 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { AuthSessionProvider, useAuthSession } from "../authentication/AuthSessionProvider";
+import {
+  AuthSessionProvider,
+  useAuthSession,
+} from "../authentication/AuthSessionProvider";
 
 const queryClient = new QueryClient();
 
@@ -26,4 +29,4 @@ const RootNavigator = () => {
       </Stack.Protected>
     </Stack>
   );
-}
+};

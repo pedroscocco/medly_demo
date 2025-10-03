@@ -1,12 +1,15 @@
 # Medly Demo Project
 
 ## Overview
+
 A practice quiz application where users can work through a set of questions, answer them, and test their knowledge. The app provides an interactive learning experience with immediate feedback.
 
 ## Purpose
+
 To help users practice and test their understanding of various topics through a structured question-and-answer workflow. The main goal is to create an engaging, user-friendly practice environment.
 
 ## Key Features
+
 - **Home Page**: Landing page with navigation to practice mode
 - **Practice Page**: Interactive question view that flows through questions as the user completes them
 - **Question View**: Display individual questions with answer input
@@ -14,11 +17,13 @@ To help users practice and test their understanding of various topics through a 
 - **Progress Tracking**: Flow through question set sequentially
 
 ## Technical Stack
+
 - React Native
 - Expo
 - TypeScript
 
 ## Requirements
+
 - Home page serves as the entry point to the app
 - Practice mode loads questions and presents them one at a time
 - Users can submit answers to questions
@@ -27,6 +32,7 @@ To help users practice and test their understanding of various topics through a 
 - API integration for fetching questions
 
 ## Focus Areas
+
 - Smooth user flow from home to practice mode
 - Clear question presentation and answer submission
 - Intuitive navigation between questions
@@ -35,6 +41,7 @@ To help users practice and test their understanding of various topics through a 
 ## Implementation Status
 
 ### Completed
+
 - ✅ Mock API with sample question data
 - ✅ React Query integration for data fetching and caching
 - ✅ Zustand store for app state management
@@ -56,10 +63,12 @@ To help users practice and test their understanding of various topics through a 
   - Check button enables when all items are placed
 
 ### In Progress
+
 - 🚧 Answer validation and feedback
 - 🚧 Gesture-based drag-and-drop for sort questions (upgrade from tap-based)
 
 ### Not Started
+
 - ⏳ Short answer question UI component
 - ⏳ Session completion summary
 - ⏳ Answer marking/grading logic

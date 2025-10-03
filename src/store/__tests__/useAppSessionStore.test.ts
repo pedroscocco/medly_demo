@@ -1,7 +1,7 @@
-import { useAppSessionStore } from '../useAppSessionStore';
-import { MarkingResult } from '../../types';
+import { useAppSessionStore } from "../useAppSessionStore";
+import { MarkingResult } from "../../types";
 
-describe('useAppSessionStore', () => {
+describe("useAppSessionStore", () => {
   beforeEach(() => {
     // Reset store state before each test
     useAppSessionStore.setState({
@@ -10,14 +10,14 @@ describe('useAppSessionStore', () => {
     });
   });
 
-  it('initializes with correct default state', () => {
+  it("initializes with correct default state", () => {
     const state = useAppSessionStore.getState();
 
     expect(state.currentUserStep).toBe(0);
     expect(state.markingResults).toEqual({});
   });
 
-  it('setCurrentUserStep updates the current step', () => {
+  it("setCurrentUserStep updates the current step", () => {
     const { setCurrentUserStep } = useAppSessionStore.getState();
 
     setCurrentUserStep(5);
@@ -25,7 +25,7 @@ describe('useAppSessionStore', () => {
     expect(useAppSessionStore.getState().currentUserStep).toBe(5);
   });
 
-  it('setNextStep increments the current step', () => {
+  it("setNextStep increments the current step", () => {
     const { setNextStep, setCurrentUserStep } = useAppSessionStore.getState();
 
     setCurrentUserStep(2);
@@ -34,7 +34,7 @@ describe('useAppSessionStore', () => {
     expect(useAppSessionStore.getState().currentUserStep).toBe(3);
   });
 
-  it('setMarkingResult stores a marking result', () => {
+  it("setMarkingResult stores a marking result", () => {
     const { setMarkingResult } = useAppSessionStore.getState();
 
     const result: MarkingResult = {
@@ -42,7 +42,7 @@ describe('useAppSessionStore', () => {
       score: 100,
       totalItems: 1,
       correctItems: 1,
-      userAnswer: '4',
+      userAnswer: "4",
     };
 
     setMarkingResult(0, result);
@@ -50,8 +50,9 @@ describe('useAppSessionStore', () => {
     expect(useAppSessionStore.getState().markingResults[0]).toEqual(result);
   });
 
-  it('clearUserSession resets state', () => {
-    const { setCurrentUserStep, setMarkingResult, clearUserSession } = useAppSessionStore.getState();
+  it("clearUserSession resets state", () => {
+    const { setCurrentUserStep, setMarkingResult, clearUserSession } =
+      useAppSessionStore.getState();
 
     // Set some state
     setCurrentUserStep(5);
@@ -60,7 +61,7 @@ describe('useAppSessionStore', () => {
       score: 100,
       totalItems: 1,
       correctItems: 1,
-      userAnswer: '4',
+      userAnswer: "4",
     });
 
     // Clear session

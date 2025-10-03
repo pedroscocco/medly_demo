@@ -14,7 +14,7 @@ import {
  */
 async function markQuestion(
   questionSpec: QuestionSpec,
-  userAnswer: McqAnswer | SortAnswer
+  userAnswer: McqAnswer | SortAnswer,
 ): Promise<MarkingResult> {
   // Simulate async operation (e.g., API call)
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -22,12 +22,12 @@ async function markQuestion(
   if (questionSpec.questionData.questionType === "mcq") {
     return markMcqQuestion(
       questionSpec as McqQuestionSpec,
-      userAnswer as McqAnswer
+      userAnswer as McqAnswer,
     );
   } else if (questionSpec.questionData.questionType === "sort") {
     return markSortQuestion(
       questionSpec as SortQuestionSpec,
-      userAnswer as SortAnswer
+      userAnswer as SortAnswer,
     );
   }
 
@@ -47,7 +47,7 @@ async function markQuestion(
  */
 export function markMcqQuestion(
   questionSpec: McqQuestionSpec,
-  userAnswer: McqAnswer
+  userAnswer: McqAnswer,
 ): MarkingResult {
   const isCorrect = userAnswer === questionSpec.questionData.correctAnswer;
 
@@ -69,7 +69,7 @@ export function markMcqQuestion(
  */
 function markSortQuestion(
   questionSpec: SortQuestionSpec,
-  userAnswer: SortAnswer
+  userAnswer: SortAnswer,
 ): MarkingResult {
   const correctMapping = questionSpec.questionData.correct_answer_mapping;
   const itemResults: { [itemText: string]: boolean } = {};
@@ -118,7 +118,7 @@ export function useMarkQuestion() {
 
   const markAnswer = async (
     questionSpec: QuestionSpec,
-    userAnswer: McqAnswer | SortAnswer
+    userAnswer: McqAnswer | SortAnswer,
   ) => {
     setIsMarking(true);
 
