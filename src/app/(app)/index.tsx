@@ -44,7 +44,7 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Medly Practice</Text>
+        <Text style={styles.title}>Learly</Text>
         <Text style={styles.welcomeMessage}>
           Welcome! Test your knowledge and track your progress through
           interactive practice sessions.

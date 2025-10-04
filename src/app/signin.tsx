@@ -36,7 +36,7 @@ export default function SignIn() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Medly Practice</Text>
+        <Text style={styles.title}>Learnly</Text>
       </View>
 
       {/* Toggle Tabs */}
