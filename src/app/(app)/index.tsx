@@ -8,6 +8,8 @@ import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
 import { styles } from "../../styles/HomeScreen.styles";
 
+import LiveActivities from "@/modules/expo-live-activity";
+
 export default function Index() {
   const { signOut } = useAuthSession();
   const router = useRouter();
@@ -25,6 +27,7 @@ export default function Index() {
   const completedQuestionsCount = Object.keys(markingResults).length;
 
   const handleStartPractice = () => {
+    LiveActivities.startActivity("Hello", "🚀");
     router.push("./practice-flow");
     if (currentUserStep === null) {
       setCurrentUserStep(0); // Start from the first question
@@ -32,6 +35,7 @@ export default function Index() {
   };
 
   const handleResetPractice = () => {
+    LiveActivities.endActivity();
     clearUserSession();
   };
 
