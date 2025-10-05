@@ -6,11 +6,11 @@ struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var questionsLeft: Int
         var currentStreak: Int
+        var lessonStartTime: Date?
     }
 
   // Fixed non-changing properties about your activity go here!
   var lessonName: String
-  var lessonStartTime: Date
 }
 
 struct WidgetLiveActivity: Widget {
@@ -38,11 +38,19 @@ struct WidgetLiveActivity: Widget {
                             Image(systemName: "clock.fill")
                                 .font(.system(size: 20))
                                 .foregroundColor(.blue)
-                            Text(context.attributes.lessonStartTime, style: .timer)
-                                .font(.system(size: 22, weight: .bold))
-                                .fontDesign(.rounded)
-                                .foregroundColor(.blue)
-                                .monospacedDigit()
+                            if let startTime = context.state.lessonStartTime {
+                                Text(startTime, style: .timer)
+                                    .font(.system(size: 22, weight: .bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundColor(.blue)
+                                    .monospacedDigit()
+                            } else {
+                                Text("-")
+                                    .font(.system(size: 22, weight: .bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundColor(.blue)
+                                    .monospacedDigit()
+                            }
                         }
                     }
                 }.offset(y: -15)
@@ -81,11 +89,19 @@ struct WidgetLiveActivity: Widget {
                     HStack(spacing: 6) {
                       Text("⏱️")
                           .font(.system(size: 20))
-                        Text(context.attributes.lessonStartTime, style: .timer)
-                            .font(.system(size: 18, weight: .bold))
-                            .fontDesign(.rounded)
-                            .foregroundColor(.blue)
-                            .monospacedDigit()
+                        if let startTime = context.state.lessonStartTime {
+                            Text(startTime, style: .timer)
+                                .font(.system(size: 18, weight: .bold))
+                                .fontDesign(.rounded)
+                                .foregroundColor(.blue)
+                                .monospacedDigit()
+                        } else {
+                            Text("-")
+                                .font(.system(size: 18, weight: .bold))
+                                .fontDesign(.rounded)
+                                .foregroundColor(.blue)
+                                .monospacedDigit()
+                        }
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
@@ -117,10 +133,17 @@ struct WidgetLiveActivity: Widget {
                     .fontDesign(.rounded)
                     .foregroundColor(.orange)
             } compactTrailing: {
-              Text("⏱️ \(context.attributes.lessonStartTime, style: .timer)")
-                  .fontDesign(.rounded)
-                  .foregroundColor(.blue)
-                  .monospacedDigit()
+              if let startTime = context.state.lessonStartTime {
+                  Text("⏱️ \(startTime, style: .timer)")
+                      .fontDesign(.rounded)
+                      .foregroundColor(.blue)
+                      .monospacedDigit()
+              } else {
+                  Text("⏱️ -")
+                      .fontDesign(.rounded)
+                      .foregroundColor(.blue)
+                      .monospacedDigit()
+              }
             } minimal: {
               Text("\(context.state.currentStreak)")
                   .fontDesign(.rounded)
@@ -134,7 +157,7 @@ struct WidgetLiveActivity: Widget {
 
 extension WidgetAttributes {
     fileprivate static var preview: WidgetAttributes {
-        WidgetAttributes(lessonName: "Math Practice", lessonStartTime: Date().addingTimeInterval(-300))
+        WidgetAttributes(lessonName: "Math Practice")
     }
 }
 
@@ -143,6 +166,7 @@ extension WidgetAttributes.ContentState {
         WidgetAttributes.ContentState(
             questionsLeft: 3,
             currentStreak: 5,
+            lessonStartTime: Date().addingTimeInterval(-300)
         )
      }
 
@@ -150,6 +174,7 @@ extension WidgetAttributes.ContentState {
          WidgetAttributes.ContentState(
             questionsLeft: 1,
             currentStreak: 7,
+            lessonStartTime: nil
          )
      }
 }

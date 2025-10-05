@@ -7,11 +7,11 @@ struct WidgetAttributes: ActivityAttributes {
     // Dynamic stateful properties about your activity go here!
     var questionsLeft: Int
     var currentStreak: Int
+    var lessonStartTime: Date?
   }
 
   // Fixed non-changing properties about your activity go here!
   var lessonName: String
-  var lessonStartTime: Date
 }
 
 public class ExpoLiveActivityModule: Module {
@@ -43,15 +43,13 @@ public class ExpoLiveActivityModule: Module {
     }
 
     Function("startActivity") {
-      (lessonName: String, lessonStartTime: Double, questionsLeft: Int, currentStreak: Int) -> Bool in
+      (lessonName: String, lessonStartTime: Double?, questionsLeft: Int, currentStreak: Int) -> Bool in
       if #available(iOS 16.2, *) {
-        let attributes = WidgetAttributes(
-          lessonName: lessonName,
-          lessonStartTime: Date(timeIntervalSince1970: lessonStartTime)
-        )
+        let attributes = WidgetAttributes(lessonName: lessonName)
         let contentState = WidgetAttributes.ContentState(
           questionsLeft: questionsLeft,
-          currentStreak: currentStreak
+          currentStreak: currentStreak,
+          lessonStartTime: lessonStartTime.map { Date(timeIntervalSince1970: $0) }
         )
         let activityContent = ActivityContent(state: contentState, staleDate: nil)
         do {
@@ -70,13 +68,14 @@ public class ExpoLiveActivityModule: Module {
     }
 
     Function("updateActivity") {
-      (questionsLeft: Int, currentStreak: Int) -> Void in
+      (questionsLeft: Int, currentStreak: Int, lessonStartTime: Double?) -> Void in
       if #available(iOS 16.2, *) {
         Task {
           for activity in Activity<WidgetAttributes>.activities {
             let newState = WidgetAttributes.ContentState(
               questionsLeft: questionsLeft,
-              currentStreak: currentStreak
+              currentStreak: currentStreak,
+              lessonStartTime: lessonStartTime.map { Date(timeIntervalSince1970: $0) }
             )
             await activity.update(using: newState)
           }

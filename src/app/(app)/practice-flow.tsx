@@ -1,7 +1,7 @@
 import LiveActivities from "@/modules/expo-live-activity";
 import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Dialog from "../../components/common/Dialog";
@@ -57,6 +57,12 @@ export default function PracticeScreen() {
   const updateBestStreak = useAppSessionStore(
     (state) => state.updateBestStreak
   );
+  const startQuestionTiming = useAppSessionStore(
+    (state) => state.startQuestionTiming
+  );
+  const completeQuestionTiming = useAppSessionStore(
+    (state) => state.completeQuestionTiming
+  );
   const commitCurrentSession = useAppSessionStore(
     (state) => state.commitCurrentSession
   );
@@ -74,6 +80,22 @@ export default function PracticeScreen() {
       router.replace("/");
     }
   }, [currentSession, router]);
+
+  // Start timing when question becomes visible
+  useLayoutEffect(() => {
+    if (!currentSession?.questionTimings[currentUserStep]) {
+      const now = Date.now();
+      startQuestionTiming(currentUserStep, now);
+
+      // Update Live Activity with new question timer
+      if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
+        const completedCount = Object.keys(markingResults).length;
+        const questionsLeft = fullQuestionStepsList.length - completedCount;
+        const currentStreak = calculateStreak(markingResults, currentUserStep);
+        LiveActivities.updateActivity(questionsLeft, currentStreak, now / 1000);
+      }
+    }
+  }, [currentUserStep, currentSession, startQuestionTiming]);
 
   // ===== Early Returns (Loading/Error States) =====
   if (isLoading) {
@@ -108,13 +130,16 @@ export default function PracticeScreen() {
         : sortAnswer;
 
     const result = await markAnswer(currentQuestion, userAnswer);
-    setMarkingResult(currentUserStep, result);
+    const completionTime = Date.now();
 
-    // Update Live Activity with new progress
-    updateLiveActivity(result);
+    setMarkingResult(currentUserStep, result);
+    completeQuestionTiming(currentUserStep, completionTime);
+
+    // Update Live Activity with new progress and null timer
+    updateLiveActivity(result, true);
   };
 
-  const updateLiveActivity = (newResult: MarkingResult) => {
+  const updateLiveActivity = (newResult: MarkingResult, clearTimer: boolean = false) => {
     const updatedResults = { ...markingResults, [currentUserStep]: newResult };
     const currentStreak = calculateStreak(updatedResults, currentUserStep);
 
@@ -125,7 +150,8 @@ export default function PracticeScreen() {
     if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
       const completedCount = Object.keys(updatedResults).length;
       const questionsLeft = fullQuestionStepsList.length - completedCount;
-      LiveActivities.updateActivity(questionsLeft, currentStreak);
+      const startTime = clearTimer ? null : (currentSession?.startedAt || Date.now()) / 1000;
+      LiveActivities.updateActivity(questionsLeft, currentStreak, startTime);
     }
   };
 

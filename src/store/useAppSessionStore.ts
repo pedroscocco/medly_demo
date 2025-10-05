@@ -3,10 +3,16 @@ import { MarkingResult } from "../types";
 
 export type SessionStatus = "in-progress" | "abandoned" | "completed";
 
+export interface QuestionTiming {
+  startedAt: number;
+  completedAt?: number;
+}
+
 export interface SessionHistory {
   sessionId: string;
   currentUserStep: number | null;
   markingResults: { [questionIndex: number]: MarkingResult };
+  questionTimings: { [questionIndex: number]: QuestionTiming };
   startedAt: number;
   sessionStatus: SessionStatus;
   bestStreak: number;
@@ -23,6 +29,8 @@ interface AppActions {
   setCurrentUserStep: (sessionStep: number | null) => void;
   setMarkingResult: (questionIndex: number, result: MarkingResult) => void;
   updateBestStreak: (currentStreak: number) => void;
+  startQuestionTiming: (questionIndex: number, time?: number) => void;
+  completeQuestionTiming: (questionIndex: number, time?: number) => void;
   clearUserSession: () => void;
   startNewSession: (sessionId: string, startTime?: number) => void;
   commitCurrentSession: (status: SessionStatus) => void;
@@ -75,6 +83,40 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
           }
         : null,
     })),
+  startQuestionTiming: (questionIndex: number, time?: number) =>
+    set((state) => ({
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            questionTimings: {
+              ...state.currentSession.questionTimings,
+              [questionIndex]: {
+                startedAt: time || Date.now(),
+              },
+            },
+          }
+        : null,
+    })),
+  completeQuestionTiming: (questionIndex: number, time?: number) =>
+    set((state) => {
+      if (!state.currentSession) return state;
+
+      const existingTiming = state.currentSession.questionTimings[questionIndex];
+      if (!existingTiming) return state;
+
+      return {
+        currentSession: {
+          ...state.currentSession,
+          questionTimings: {
+            ...state.currentSession.questionTimings,
+            [questionIndex]: {
+              ...existingTiming,
+              completedAt: time || Date.now(),
+            },
+          },
+        },
+      };
+    }),
   clearUserSession: () =>
     set({
       currentSession: null,
@@ -85,6 +127,7 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
         sessionId,
         currentUserStep: 0,
         markingResults: {},
+        questionTimings: {},
         startedAt: startTime,
         sessionStatus: "in-progress",
         bestStreak: 0,
