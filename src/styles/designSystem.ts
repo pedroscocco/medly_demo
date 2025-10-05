@@ -18,6 +18,13 @@ export const colors = {
   gray500: "#6B7280",
   gray400: "#9CA3AF",
 
+  // Text colors
+  text: "#1F2937",
+  textSecondary: "#6B7280",
+
+  // Border colors
+  border: "#E5E5E5",
+
   // Semantic colors
   error: "#ec625d",
   errorLight: "#faeeee",

@@ -4,10 +4,12 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Dialog from "../../components/common/Dialog";
 import CheckButton from "../../components/practice-flow/CheckButton";
 import MultipleChoiceQuestion from "../../components/practice-flow/MultipleChoiceQuestion";
 import QuestionHeader from "../../components/practice-flow/QuestionHeader";
 import ResultFeedback from "../../components/practice-flow/ResultFeedback";
+import SessionSummary from "../../components/practice-flow/SessionSummary";
 import SortQuestion from "../../components/practice-flow/SortQuestion";
 import { useMarkQuestion } from "../../hooks/useMarkQuestion";
 import useSessionQuery from "../../hooks/useSessionQuery";
@@ -40,6 +42,8 @@ export default function PracticeScreen() {
   // ===== Local State =====
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [sortAnswer, setSortAnswer] = useState<{ [key: string]: string[] }>({});
+  const [showAbandonDialog, setShowAbandonDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // ===== Hooks =====
   const { isMarking, markAnswer } = useMarkQuestion();
@@ -49,6 +53,9 @@ export default function PracticeScreen() {
   const setNextStep = useAppSessionStore((state) => state.setNextStep);
   const setMarkingResult = useAppSessionStore(
     (state) => state.setMarkingResult
+  );
+  const updateBestStreak = useAppSessionStore(
+    (state) => state.updateBestStreak
   );
   const commitCurrentSession = useAppSessionStore(
     (state) => state.commitCurrentSession
@@ -108,23 +115,25 @@ export default function PracticeScreen() {
   };
 
   const updateLiveActivity = (newResult: MarkingResult) => {
-    if (!LiveActivities.areActivitiesEnabled() || !LiveActivities.isActivityInProgress()) {
-      return;
-    }
-
     const updatedResults = { ...markingResults, [currentUserStep]: newResult };
-    const completedCount = Object.keys(updatedResults).length;
-    const questionsLeft = fullQuestionStepsList.length - completedCount;
     const currentStreak = calculateStreak(updatedResults, currentUserStep);
 
-    LiveActivities.updateActivity(questionsLeft, currentStreak);
+    // Update best streak in session
+    updateBestStreak(currentStreak);
+
+    // Update Live Activity if enabled
+    if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
+      const completedCount = Object.keys(updatedResults).length;
+      const questionsLeft = fullQuestionStepsList.length - completedCount;
+      LiveActivities.updateActivity(questionsLeft, currentStreak);
+    }
   };
 
   const handleContinue = () => {
     const isLastQuestion = currentUserStep >= fullQuestionStepsList.length - 1;
 
     if (isLastQuestion) {
-      finishSession("completed");
+      setShowSuccessDialog(true);
     } else {
       moveToNextQuestion();
     }
@@ -139,11 +148,21 @@ export default function PracticeScreen() {
   const finishSession = (status: "completed" | "abandoned") => {
     LiveActivities.endActivity();
     commitCurrentSession(status);
-    router.dismiss();
+    router.back();
   };
 
   const handleClose = () => {
+    setShowAbandonDialog(true);
+  };
+
+  const handleAbandonConfirm = () => {
+    setShowAbandonDialog(false);
     finishSession("abandoned");
+  };
+
+  const handleSuccessConfirm = () => {
+    setShowSuccessDialog(false);
+    finishSession("completed");
   };
 
   const handleSortAnswerChange = (mapping: { [key: string]: string[] }) => {
@@ -232,6 +251,45 @@ export default function PracticeScreen() {
         loading={isMarking}
         markingResult={markingResult}
       />
+
+      {/* Abandon Session Dialog */}
+      <Dialog
+        visible={showAbandonDialog}
+        title="Leave Practice?"
+        message="You'll lose all the progress from this session."
+        buttons={[
+          {
+            text: "Continue Practice",
+            onPress: () => setShowAbandonDialog(false),
+            variant: "primary",
+          },
+          {
+            text: "Leave",
+            onPress: handleAbandonConfirm,
+            variant: "secondary",
+          },
+        ]}
+        onDismiss={() => setShowAbandonDialog(false)}
+      />
+
+      {/* Success Dialog */}
+      <Dialog
+        visible={showSuccessDialog}
+        title="🎉 Session Complete!"
+        buttons={[
+          {
+            text: "Continue",
+            onPress: handleSuccessConfirm,
+            variant: "primary",
+          },
+        ]}
+      >
+        <SessionSummary
+          markingResults={markingResults}
+          totalQuestions={fullQuestionStepsList.length}
+          bestStreak={currentSession?.bestStreak || 0}
+        />
+      </Dialog>
     </SafeAreaView>
   );
 }

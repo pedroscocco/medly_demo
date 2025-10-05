@@ -9,6 +9,7 @@ export interface SessionHistory {
   markingResults: { [questionIndex: number]: MarkingResult };
   startedAt: number;
   sessionStatus: SessionStatus;
+  bestStreak: number;
   completedAt?: number;
 }
 
@@ -21,6 +22,7 @@ interface AppActions {
   setNextStep: () => void;
   setCurrentUserStep: (sessionStep: number | null) => void;
   setMarkingResult: (questionIndex: number, result: MarkingResult) => void;
+  updateBestStreak: (currentStreak: number) => void;
   clearUserSession: () => void;
   startNewSession: (sessionId: string, startTime?: number) => void;
   commitCurrentSession: (status: SessionStatus) => void;
@@ -64,6 +66,15 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
           }
         : null,
     })),
+  updateBestStreak: (currentStreak: number) =>
+    set((state) => ({
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            bestStreak: Math.max(state.currentSession.bestStreak, currentStreak),
+          }
+        : null,
+    })),
   clearUserSession: () =>
     set({
       currentSession: null,
@@ -76,6 +87,7 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
         markingResults: {},
         startedAt: startTime,
         sessionStatus: "in-progress",
+        bestStreak: 0,
       },
     }),
   commitCurrentSession: (status: SessionStatus) =>
