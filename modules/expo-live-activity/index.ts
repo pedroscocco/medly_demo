@@ -9,6 +9,7 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
   isActivityInProgress(): boolean;
   startActivity(lessonName: string, lessonStartTime: number | null, questionsLeft: number, currentStreak: number): Promise<boolean>;
   updateActivity(questionsLeft: number, currentStreak: number, lessonStartTime: number | null): void;
+  updateActivityTimer(lessonStartTime: number | null): void;
   endActivity(): void;
 }
 

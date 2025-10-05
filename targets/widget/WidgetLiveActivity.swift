@@ -137,12 +137,10 @@ struct WidgetLiveActivity: Widget {
                   Text("⏱️ \(startTime, style: .timer)")
                       .fontDesign(.rounded)
                       .foregroundColor(.blue)
-                      .monospacedDigit()
               } else {
                   Text("⏱️ -")
                       .fontDesign(.rounded)
                       .foregroundColor(.blue)
-                      .monospacedDigit()
               }
             } minimal: {
               Text("\(context.state.currentStreak)")

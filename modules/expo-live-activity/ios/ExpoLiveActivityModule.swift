@@ -83,6 +83,22 @@ public class ExpoLiveActivityModule: Module {
       }
     }
 
+    Function("updateActivityTimer") {
+      (lessonStartTime: Double?) -> Void in
+      if #available(iOS 16.2, *) {
+        Task {
+          for activity in Activity<WidgetAttributes>.activities {
+            let newState = WidgetAttributes.ContentState(
+              questionsLeft: activity.content.state.questionsLeft,
+              currentStreak: activity.content.state.currentStreak,
+              lessonStartTime: lessonStartTime.map { Date(timeIntervalSince1970: $0) }
+            )
+            await activity.update(using: newState)
+          }
+        }
+      }
+    }
+
     Function("endActivity") { () -> Void in
       if #available(iOS 16.2, *) {
         Task {
