@@ -100,7 +100,7 @@ function sessions_questions(method: Method) {
 }
 
 function createNewSession() {
-  const sessionStepsCount = 3 + Math.floor(Math.random() * 5); // 3 to 7 questions
+  const sessionStepsCount = 2 + Math.floor(Math.random() * 1); // 1 to 2 questions per session 
 
   // random selection indexes from total pool of questions
   const totalQuestions = MOCK_QUESTION_STEPS.steps.length;
@@ -117,6 +117,7 @@ function createNewSession() {
   return {
     sessionId: Math.random().toString(36).substring(2, 15),
     steps: selectedQuestionSteps,
+    // steps: [MOCK_QUESTION_STEPS.steps[1], ...selectedQuestionSteps],
   };
 }
 

@@ -15,6 +15,11 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSSupportsLiveActivities": true
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.pedroscocco.medly-demo"
+        ]
       }
     },
     "android": {

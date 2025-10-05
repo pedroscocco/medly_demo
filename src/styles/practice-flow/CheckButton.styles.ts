@@ -10,7 +10,7 @@ import {
 
 export const styles = StyleSheet.create({
   bottomContainer: {
-    padding: spacing.xxl,
+    paddingHorizontal: spacing.xxl,
     marginTop: "auto",
     zIndex: 10,
   },
