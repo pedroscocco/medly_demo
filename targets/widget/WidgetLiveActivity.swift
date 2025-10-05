@@ -4,46 +4,129 @@ import SwiftUI
 
 struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
+        var questionsLeft: Int
+        var currentStreak: Int
     }
 
-    // Fixed non-changing properties about your activity go here!
-    var name: String
+  // Fixed non-changing properties about your activity go here!
+  var lessonName: String
+  var lessonStartTime: Date
 }
 
 struct WidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WidgetAttributes.self) { context in
             // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
+            HStack {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("\(context.state.questionsLeft) questions left")
+                        .font(.system(size: 24, weight: .heavy))
+                        .fontDesign(.rounded)
+                        .foregroundColor(.white)
+
+                    HStack(spacing: 20) {
+                        HStack(spacing: 6) {
+                            Text("🔥")
+                                .font(.system(size: 24))
+                            Text("\(context.state.currentStreak)")
+                                .font(.system(size: 22, weight: .bold))
+                                .fontDesign(.rounded)
+                                .foregroundColor(.orange)
+                        }
+
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                            Text(context.attributes.lessonStartTime, style: .timer)
+                                .font(.system(size: 22, weight: .bold))
+                                .fontDesign(.rounded)
+                                .foregroundColor(.blue)
+                                .monospacedDigit()
+                        }
+                    }
+                }.offset(y: -15)
+
+                Spacer()
+
+                VStack(alignment: .trailing) {
+                    Text("medly")
+                        .font(.system(size: 24, weight: .heavy))
+                        .fontDesign(.rounded)
+                        .foregroundColor(.white.opacity(0.4))
+                    Text("🐼")
+                        .font(.system(size: 120))
+                }
+                .offset(y: 38)
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
+            .padding()
+            .activityBackgroundTint(Color(red: 0.094, green: 0.129, blue: 0.137))
+            .activitySystemActionForegroundColor(Color.primary)
 
         } dynamicIsland: { context in
             DynamicIsland {
                 // Expanded UI goes here.  Compose the expanded UI through
                 // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    HStack(spacing: 6) {
+                        Text("🔥")
+                            .font(.system(size: 20))
+                        Text("\(context.state.currentStreak)")
+                            .font(.system(size: 18, weight: .bold))
+                            .fontDesign(.rounded)
+                            .foregroundColor(.orange)
+                    }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    HStack(spacing: 6) {
+                      Text("⏱️")
+                          .font(.system(size: 20))
+                        Text(context.attributes.lessonStartTime, style: .timer)
+                            .font(.system(size: 18, weight: .bold))
+                            .fontDesign(.rounded)
+                            .foregroundColor(.blue)
+                            .monospacedDigit()
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                  VStack(alignment: .leading) {
+                      Text("\(context.state.questionsLeft) questions left")
+                          .font(.system(size: 24, weight: .heavy))
+                          .fontDesign(.rounded)
+                          .foregroundColor(.white)
+                          .offset(y: 15)
+
+                      HStack {
+                          Text("medly")
+                              .font(.system(size: 20, weight: .heavy))
+                              .fontDesign(.rounded)
+                              .foregroundColor(.white.opacity(0.4))
+                          Spacer()
+                          Text("🐼")
+                              .font(.system(size: 80))
+                      }
+                  }
+                  .offset(y: 10)
+                  .padding(.horizontal)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .activityBackgroundTint(Color(red: 0.094, green: 0.129, blue: 0.137))
+                  .activitySystemActionForegroundColor(Color.primary)
                 }
             } compactLeading: {
-                Text("L")
+                Text("🔥 \(context.state.currentStreak)")
+                    .fontDesign(.rounded)
+                    .foregroundColor(.orange)
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+              Text("⏱️ \(context.attributes.lessonStartTime, style: .timer)")
+                  .fontDesign(.rounded)
+                  .foregroundColor(.blue)
+                  .monospacedDigit()
             } minimal: {
-                Text(context.state.emoji)
+              Text("\(context.state.currentStreak)")
+                  .fontDesign(.rounded)
+                  .foregroundColor(.orange)
             }
-            .widgetURL(URL(string: "https://www.expo.dev"))
+            .widgetURL(URL(string: "medlydemo://practice-flow"))
             .keylineTint(Color.red)
         }
     }
@@ -51,23 +134,29 @@ struct WidgetLiveActivity: Widget {
 
 extension WidgetAttributes {
     fileprivate static var preview: WidgetAttributes {
-        WidgetAttributes(name: "World")
+        WidgetAttributes(lessonName: "Math Practice", lessonStartTime: Date().addingTimeInterval(-300))
     }
 }
 
 extension WidgetAttributes.ContentState {
-    fileprivate static var smiley: WidgetAttributes.ContentState {
-        WidgetAttributes.ContentState(emoji: "😀")
+    fileprivate static var inProgress: WidgetAttributes.ContentState {
+        WidgetAttributes.ContentState(
+            questionsLeft: 3,
+            currentStreak: 5,
+        )
      }
-     
-     fileprivate static var starEyes: WidgetAttributes.ContentState {
-         WidgetAttributes.ContentState(emoji: "🤩")
+
+     fileprivate static var almostDone: WidgetAttributes.ContentState {
+         WidgetAttributes.ContentState(
+            questionsLeft: 1,
+            currentStreak: 7,
+         )
      }
 }
 
 #Preview("Notification", as: .content, using: WidgetAttributes.preview) {
    WidgetLiveActivity()
 } contentStates: {
-    WidgetAttributes.ContentState.smiley
-    WidgetAttributes.ContentState.starEyes
+    WidgetAttributes.ContentState.inProgress
+    WidgetAttributes.ContentState.almostDone
 }

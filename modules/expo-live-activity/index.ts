@@ -7,8 +7,8 @@ export type ExpoLiveActivityModuleEvents = {
 declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModuleEvents> {
   areActivitiesEnabled(): boolean;
   isActivityInProgress(): boolean;
-  startActivity(name: string, emoji: string): Promise<boolean>;
-  updateActivity(emoji: string): void;
+  startActivity(lessonName: string, lessonStartTime: number, questionsLeft: number, currentStreak: number): Promise<boolean>;
+  updateActivity(questionsLeft: number, currentStreak: number): void;
   endActivity(): void;
 }
 
