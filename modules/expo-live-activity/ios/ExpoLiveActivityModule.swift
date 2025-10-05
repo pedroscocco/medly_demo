@@ -88,7 +88,7 @@ public class ExpoLiveActivityModule: Module {
       if #available(iOS 16.2, *) {
         Task {
           for activity in Activity<WidgetAttributes>.activities {
-            await activity.end(nil, dismissalPolicy: .default)
+            await activity.end(nil, dismissalPolicy: .immediate)
           }
         }
 
