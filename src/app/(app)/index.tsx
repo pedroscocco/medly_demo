@@ -24,10 +24,10 @@ export default function Index() {
 
   // Redirect to practice-flow if there's an ongoing session
   useEffect(() => {
-    if (currentSession && currentSession.sessionStatus === "in-progress") {
-      router.push("./practice-flow");
+    if (currentSession?.sessionStatus === "in-progress") {
+      router.replace("./practice-flow");
     }
-  }, [currentSession, router]);
+  }, [currentSession?.sessionStatus, router]);
 
   const handleStartPractice = () => {
     if (!data) return;

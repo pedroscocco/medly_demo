@@ -13,44 +13,87 @@ import { useMarkQuestion } from "../../hooks/useMarkQuestion";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
-import { SortQuestionSpec } from "../../types";
+import { MarkingResult, SortQuestionSpec } from "../../types";
+
+// Helper: Calculate consecutive correct answers from the current position backwards
+function calculateStreak(
+  markingResults: { [questionIndex: number]: MarkingResult },
+  currentStep: number
+): number {
+  let streak = 0;
+  for (let i = currentStep; i >= 0; i--) {
+    if (markingResults[i]?.isCorrect) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
 
 export default function PracticeScreen() {
+  // ===== Routing & Data =====
   const router = useRouter();
   const { data, isLoading, error } = useSessionQuery();
   const fullQuestionStepsList = data?.steps || [];
+
+  // ===== Local State =====
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [sortAnswer, setSortAnswer] = useState<{ [key: string]: string[] }>({});
 
+  // ===== Hooks =====
   const { isMarking, markAnswer } = useMarkQuestion();
 
+  // ===== Store State & Actions =====
   const currentSession = useAppSessionStore((state) => state.currentSession);
   const setNextStep = useAppSessionStore((state) => state.setNextStep);
   const setMarkingResult = useAppSessionStore(
-    (state) => state.setMarkingResult,
+    (state) => state.setMarkingResult
   );
   const commitCurrentSession = useAppSessionStore(
-    (state) => state.commitCurrentSession,
+    (state) => state.commitCurrentSession
   );
 
-  // Redirect to home if no active session
-  useEffect(() => {
-    if (!currentSession) {
-      router.replace("/" as any);
-    }
-  }, [currentSession, router]);
-
+  // ===== Derived State =====
   const currentUserStep = currentSession?.currentUserStep || 0;
   const markingResults = currentSession?.markingResults || {};
-
   const currentQuestion = fullQuestionStepsList[currentUserStep];
   const markingResult = markingResults[currentUserStep];
 
-  const edgeCaseView = renderEdgeCase(isLoading, error, currentQuestion);
-  if (edgeCaseView) {
-    return edgeCaseView;
+  // ===== Effects =====
+  // Redirect to home if no active session
+  useEffect(() => {
+    if (!currentSession) {
+      router.replace("/");
+    }
+  }, [currentSession, router]);
+
+  // ===== Early Returns (Loading/Error States) =====
+  if (isLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
   }
 
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Error loading questions</Text>
+      </View>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>No question found</Text>
+      </View>
+    );
+  }
+
+  // ===== Event Handlers =====
   const handleCheck = async () => {
     const userAnswer =
       currentQuestion.questionData.questionType === "mcq"
@@ -61,76 +104,84 @@ export default function PracticeScreen() {
     setMarkingResult(currentUserStep, result);
 
     // Update Live Activity with new progress
-    if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
-      const newMarkingResults = { ...markingResults, [currentUserStep]: result };
-      const completedCount = Object.keys(newMarkingResults).length;
-      const questionsLeft = fullQuestionStepsList.length - completedCount;
+    updateLiveActivity(result);
+  };
 
-      // Calculate current streak (consecutive correct answers from the end)
-      let currentStreak = 0;
-      for (let i = currentUserStep; i >= 0; i--) {
-        const stepResult = i === currentUserStep ? result : newMarkingResults[i];
-        if (stepResult?.isCorrect) {
-          currentStreak++;
-        } else {
-          break;
-        }
-      }
-
-      LiveActivities.updateActivity(questionsLeft, currentStreak);
+  const updateLiveActivity = (newResult: MarkingResult) => {
+    if (!LiveActivities.areActivitiesEnabled() || !LiveActivities.isActivityInProgress()) {
+      return;
     }
+
+    const updatedResults = { ...markingResults, [currentUserStep]: newResult };
+    const completedCount = Object.keys(updatedResults).length;
+    const questionsLeft = fullQuestionStepsList.length - completedCount;
+    const currentStreak = calculateStreak(updatedResults, currentUserStep);
+
+    LiveActivities.updateActivity(questionsLeft, currentStreak);
   };
 
   const handleContinue = () => {
-    // Move to next question after seeing results
-    if (currentUserStep < fullQuestionStepsList.length - 1) {
-      setNextStep();
-      setSelectedAnswer(null); // Reset selection for next question
-      setSortAnswer({}); // Reset sort answer
+    const isLastQuestion = currentUserStep >= fullQuestionStepsList.length - 1;
+
+    if (isLastQuestion) {
+      finishSession("completed");
     } else {
-      // Finished all questions, commit as completed and go back to home
-      LiveActivities.endActivity();
-      commitCurrentSession("completed");
-      router.push("/" as any);
+      moveToNextQuestion();
     }
   };
 
-  const handleClose = () => {
-    // Abandon session when closing
+  const moveToNextQuestion = () => {
+    setNextStep();
+    setSelectedAnswer(null);
+    setSortAnswer({});
+  };
+
+  const finishSession = (status: "completed" | "abandoned") => {
     LiveActivities.endActivity();
-    commitCurrentSession("abandoned");
-    router.dismissTo("/" as any);
+    commitCurrentSession(status);
+    router.dismiss();
+  };
+
+  const handleClose = () => {
+    finishSession("abandoned");
   };
 
   const handleSortAnswerChange = (mapping: { [key: string]: string[] }) => {
     setSortAnswer(mapping);
   };
 
-  // Determine if check button should be enabled
-  const isCheckEnabled = () => {
-    if (currentQuestion.questionData.questionType === "mcq") {
+  // ===== Helper Functions =====
+  const isCheckEnabled = (): boolean => {
+    const questionType = currentQuestion.questionData.questionType;
+
+    if (questionType === "mcq") {
       return !!selectedAnswer;
-    } else if (currentQuestion.questionData.questionType === "sort") {
-      // Check if all items are placed in categories
+    }
+
+    if (questionType === "sort") {
       const sortQ = currentQuestion as SortQuestionSpec;
       const totalItems = sortQ.questionData.options.length;
       const placedItems = Object.values(sortAnswer).flat().length;
       return placedItems === totalItems;
     }
+
     return false;
   };
 
-  // Get question type label
-  const getQuestionTypeLabel = () => {
-    if (currentQuestion.questionData.questionType === "mcq") {
-      return "Choose the correct answer";
-    } else if (currentQuestion.questionData.questionType === "sort") {
-      return "Drag into the correct category";
+  const getQuestionTypeLabel = (): string => {
+    const questionType = currentQuestion.questionData.questionType;
+
+    switch (questionType) {
+      case "mcq":
+        return "Choose the correct answer";
+      case "sort":
+        return "Drag into the correct category";
+      default:
+        return "Question";
     }
-    return "Question";
   };
 
-  // Render based on question type
+  // ===== Render =====
   return (
     <SafeAreaView style={styles.screenContainer}>
       <QuestionHeader
@@ -166,14 +217,8 @@ export default function PracticeScreen() {
           disabled={!!markingResult}
         />
       ) : (
-        <View
-          style={{
-            height: "70%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text>Unsupported question type</Text>
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>Unsupported question type</Text>
         </View>
       )}
 
@@ -189,36 +234,4 @@ export default function PracticeScreen() {
       />
     </SafeAreaView>
   );
-}
-
-function renderEdgeCase(
-  isLoading: boolean,
-  error: any,
-  currentQuestion: any,
-): React.ReactElement | null {
-  if (isLoading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Error loading questions</Text>
-      </View>
-    );
-  }
-
-  if (!currentQuestion) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>No question found</Text>
-      </View>
-    );
-  }
-
-  return null;
 }
