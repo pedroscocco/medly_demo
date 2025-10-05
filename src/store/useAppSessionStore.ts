@@ -1,9 +1,20 @@
 import { create } from "zustand";
 import { MarkingResult } from "../types";
 
-interface AppState {
+export type SessionStatus = "in-progress" | "abandoned" | "completed";
+
+export interface SessionHistory {
+  sessionId: string;
   currentUserStep: number | null;
   markingResults: { [questionIndex: number]: MarkingResult };
+  startedAt: number;
+  sessionStatus: SessionStatus;
+  completedAt?: number;
+}
+
+interface AppState {
+  currentSession: SessionHistory | null;
+  sessionHistory: { [sessionId: string]: SessionHistory };
 }
 
 interface AppActions {
@@ -11,32 +22,93 @@ interface AppActions {
   setCurrentUserStep: (sessionStep: number | null) => void;
   setMarkingResult: (questionIndex: number, result: MarkingResult) => void;
   clearUserSession: () => void;
+  startNewSession: (sessionId: string, startTime?: number) => void;
+  commitCurrentSession: (status: SessionStatus) => void;
+  loadSession: (sessionId: string) => void;
+  getSessionHistory: (sessionId: string) => SessionHistory | undefined;
 }
 
-export const useAppSessionStore = create<AppState & AppActions>((set) => ({
+export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
   // State
-  currentUserStep: 0,
-  markingResults: {},
+  currentSession: null,
+  sessionHistory: {},
 
   // Actions
   setNextStep: () =>
     set((state) => ({
-      currentUserStep: (state.currentUserStep || 0) + 1,
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            currentUserStep: (state.currentSession.currentUserStep || 0) + 1,
+          }
+        : null,
     })),
   setCurrentUserStep: (sessionStep: number | null) =>
-    set({
-      currentUserStep: sessionStep,
-    }),
+    set((state) => ({
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            currentUserStep: sessionStep,
+          }
+        : null,
+    })),
   setMarkingResult: (questionIndex: number, result: MarkingResult) =>
     set((state) => ({
-      markingResults: {
-        ...state.markingResults,
-        [questionIndex]: result,
-      },
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            markingResults: {
+              ...state.currentSession.markingResults,
+              [questionIndex]: result,
+            },
+          }
+        : null,
     })),
   clearUserSession: () =>
     set({
-      currentUserStep: null,
-      markingResults: {},
+      currentSession: null,
     }),
+  startNewSession: (sessionId: string, startTime: number = Date.now()) =>
+    set({
+      currentSession: {
+        sessionId,
+        currentUserStep: 0,
+        markingResults: {},
+        startedAt: startTime,
+        sessionStatus: "in-progress",
+      },
+    }),
+  commitCurrentSession: (status: SessionStatus) =>
+    set((state) => {
+      if (!state.currentSession) return state;
+
+      const completedSession: SessionHistory = {
+        ...state.currentSession,
+        sessionStatus: status,
+        completedAt: Date.now(),
+      };
+
+      return {
+        currentSession: null,
+        sessionHistory: {
+          ...state.sessionHistory,
+          [state.currentSession.sessionId]: completedSession,
+        },
+      };
+    }),
+  loadSession: (sessionId: string) =>
+    set((state) => {
+      const session = state.sessionHistory[sessionId];
+      if (!session) return state;
+
+      return {
+        currentSession: {
+          ...session,
+          sessionStatus: "in-progress",
+        },
+      };
+    }),
+  getSessionHistory: (sessionId: string) => {
+    return get().sessionHistory[sessionId];
+  },
 }));

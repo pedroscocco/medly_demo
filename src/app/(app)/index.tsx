@@ -1,8 +1,9 @@
 import { useAuthSession } from "@/src/authentication/AuthSessionProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from "react-native-safe-area-context";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
@@ -15,32 +16,46 @@ export default function Index() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useSessionQuery();
-  const clearUserSession = useAppSessionStore(
-    (state) => state.clearUserSession,
+  const currentSession = useAppSessionStore((state) => state.currentSession);
+  const startNewSession = useAppSessionStore((state) => state.startNewSession);
+  const commitCurrentSession = useAppSessionStore(
+    (state) => state.commitCurrentSession
   );
 
-  const currentUserStep = useAppSessionStore((state) => state.currentUserStep);
-  const setCurrentUserStep = useAppSessionStore(
-    (state) => state.setCurrentUserStep,
-  );
-  const markingResults = useAppSessionStore((state) => state.markingResults);
-  const completedQuestionsCount = Object.keys(markingResults).length;
+  // Redirect to practice-flow if there's an ongoing session
+  useEffect(() => {
+    if (currentSession && currentSession.sessionStatus === "in-progress") {
+      router.push("./practice-flow");
+    }
+  }, [currentSession, router]);
 
   const handleStartPractice = () => {
-    LiveActivities.startActivity("Hello", "🚀");
-    router.push("./practice-flow");
-    if (currentUserStep === null) {
-      setCurrentUserStep(0); // Start from the first question
-    }
-  };
+    if (!data) return;
 
-  const handleResetPractice = () => {
-    LiveActivities.endActivity();
-    clearUserSession();
+    const startTime = Date.now();
+
+    // Start a new session
+    startNewSession(data.sessionId.toString(), startTime);
+
+    // Start Live Activity
+    if (LiveActivities.areActivitiesEnabled()) {
+      if (LiveActivities.isActivityInProgress()) {
+        LiveActivities.endActivity();
+      }
+      LiveActivities.startActivity(
+        "Learnly Practice",
+        startTime / 1000,
+        data.steps.length,
+        0
+      );
+    }
+    router.push("./practice-flow");
   };
 
   const handleNewSession = () => {
-    clearUserSession();
+    if (currentSession) {
+      commitCurrentSession("abandoned");
+    }
     queryClient.resetQueries({ queryKey: ["questions"] });
   };
 
@@ -48,7 +63,7 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Learly</Text>
+        <Text style={styles.title}>learnly</Text>
         <Text style={styles.welcomeMessage}>
           Welcome! Test your knowledge and track your progress through
           interactive practice sessions.
@@ -96,38 +111,14 @@ export default function Index() {
             <Text style={styles.statsNumber}>{data.steps.length}</Text>
           </View>
 
-          {/* Show progress only if user has started a session */}
-          {currentUserStep !== null && (
-            <View style={styles.statsCard}>
-              <Text style={styles.statsText}>Current Progress</Text>
-              <Text style={styles.statsNumber}>
-                {completedQuestionsCount} / {data.steps.length}
-              </Text>
-            </View>
-          )}
-
           {/* Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.primaryButton}
               onPress={handleStartPractice}
             >
-              <Text style={styles.primaryButtonText}>
-                {currentUserStep !== null
-                  ? "Continue Practice"
-                  : "Start Practice"}
-              </Text>
+              <Text style={styles.primaryButtonText}>Start Practice</Text>
             </TouchableOpacity>
-
-            {/* Allow reset only if user has started a session */}
-            {currentUserStep !== null && (
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={handleResetPractice}
-              >
-                <Text style={styles.secondaryButtonText}>Restart Practice</Text>
-              </TouchableOpacity>
-            )}
           </View>
         </View>
       )}

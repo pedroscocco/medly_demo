@@ -1,6 +1,7 @@
+import LiveActivities from "@/modules/expo-live-activity";
 import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CheckButton from "../../components/practice-flow/CheckButton";
@@ -23,16 +24,24 @@ export default function PracticeScreen() {
 
   const { isMarking, markAnswer } = useMarkQuestion();
 
-  const currentUserStep =
-    useAppSessionStore((state) => state.currentUserStep) || 0;
+  const currentSession = useAppSessionStore((state) => state.currentSession);
   const setNextStep = useAppSessionStore((state) => state.setNextStep);
-  const setCurrentUserStep = useAppSessionStore(
-    (state) => state.setCurrentUserStep,
-  );
-  const markingResults = useAppSessionStore((state) => state.markingResults);
   const setMarkingResult = useAppSessionStore(
     (state) => state.setMarkingResult,
   );
+  const commitCurrentSession = useAppSessionStore(
+    (state) => state.commitCurrentSession,
+  );
+
+  // Redirect to home if no active session
+  useEffect(() => {
+    if (!currentSession) {
+      router.replace("/" as any);
+    }
+  }, [currentSession, router]);
+
+  const currentUserStep = currentSession?.currentUserStep || 0;
+  const markingResults = currentSession?.markingResults || {};
 
   const currentQuestion = fullQuestionStepsList[currentUserStep];
   const markingResult = markingResults[currentUserStep];
@@ -50,6 +59,26 @@ export default function PracticeScreen() {
 
     const result = await markAnswer(currentQuestion, userAnswer);
     setMarkingResult(currentUserStep, result);
+
+    // Update Live Activity with new progress
+    if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
+      const newMarkingResults = { ...markingResults, [currentUserStep]: result };
+      const completedCount = Object.keys(newMarkingResults).length;
+      const questionsLeft = fullQuestionStepsList.length - completedCount;
+
+      // Calculate current streak (consecutive correct answers from the end)
+      let currentStreak = 0;
+      for (let i = currentUserStep; i >= 0; i--) {
+        const stepResult = i === currentUserStep ? result : newMarkingResults[i];
+        if (stepResult?.isCorrect) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+
+      LiveActivities.updateActivity(questionsLeft, currentStreak);
+    }
   };
 
   const handleContinue = () => {
@@ -59,14 +88,17 @@ export default function PracticeScreen() {
       setSelectedAnswer(null); // Reset selection for next question
       setSortAnswer({}); // Reset sort answer
     } else {
-      // Finished all questions, go back to home
-      setCurrentUserStep(null);
+      // Finished all questions, commit as completed and go back to home
+      LiveActivities.endActivity();
+      commitCurrentSession("completed");
       router.push("/" as any);
     }
   };
 
   const handleClose = () => {
-    // setCurrentSessionStep(0);
+    // Abandon session when closing
+    LiveActivities.endActivity();
+    commitCurrentSession("abandoned");
     router.dismissTo("/" as any);
   };
 
