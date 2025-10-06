@@ -1,0 +1,25 @@
+appId: com.pedroscocco.medly-demo
+---
+- launchApp
+- assertVisible: 'Learnly'
+- assertVisible: 'Sign In'
+- assertVisible: 'Sign Up'
+- tapOn: 'Sign Up'
+- tapOn: 'Enter your email'
+- inputText: 'p'
+- tapOn: 'Enter your password'
+- inputText: '123'
+- tapOn:
+    text: 'Sign Up'
+    below: 'Enter your password'
+- assertVisible: 'Email already registered'
+- tapOn: 'Sign In'
+- tapOn: 'Enter your email'
+- inputText: 'p2'
+- tapOn: 'Enter your password'
+- inputText: '123'
+- tapOn:
+    text: 'Sign In'
+    below: 'Enter your password'
+- assertVisible: 'User not found'
+- stopApp

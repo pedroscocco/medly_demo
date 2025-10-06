@@ -1,0 +1,13 @@
+appId: com.pedroscocco.medly-demo
+---
+- launchApp
+- assertVisible: 'Learnly'
+- assertVisible: 'Sign In'
+- runFlow:
+    file: subflows/login.yml
+    env:
+      email: 'p'
+      password: '123'
+- assertVisible: '🦊'
+- tapOn: 'Sign Out'
+- stopApp

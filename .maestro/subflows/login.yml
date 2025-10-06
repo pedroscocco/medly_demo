@@ -1,0 +1,9 @@
+appId: com.pedroscocco.medly-demo
+---
+- tapOn: 'Enter your email'
+- inputText: ${email}
+- tapOn: 'Enter your password'
+- inputText: ${password}
+- tapOn:
+    text: 'Sign In'
+    below: 'Enter your password'

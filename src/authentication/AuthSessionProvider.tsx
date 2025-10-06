@@ -60,6 +60,7 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
         queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       }
     },
+    retry: false,
   });
 
   return (

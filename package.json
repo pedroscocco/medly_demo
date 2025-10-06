@@ -12,7 +12,8 @@
     "test": "jest"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
   },
   "dependencies": {
     "@bacons/apple-targets": "^3.0.5",

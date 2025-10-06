@@ -5,16 +5,24 @@ describe("useAppSessionStore", () => {
   beforeEach(() => {
     // Reset store state before each test
     useAppSessionStore.setState({
-      currentUserStep: 0,
-      markingResults: {},
+      currentSession: {
+        sessionId: "",
+        currentUserStep: 0,
+        markingResults: {},
+        questionTimings: {},
+        startedAt: 0,
+        sessionStatus: "not-started",
+        bestStreak: 0,
+      },
+      sessionHistory: {},
     });
   });
 
   it("initializes with correct default state", () => {
     const state = useAppSessionStore.getState();
 
-    expect(state.currentUserStep).toBe(0);
-    expect(state.markingResults).toEqual({});
+    expect(state.currentSession.currentUserStep).toBe(0);
+    expect(state.currentSession.markingResults).toEqual({});
   });
 
   it("setCurrentUserStep updates the current step", () => {
@@ -22,7 +30,7 @@ describe("useAppSessionStore", () => {
 
     setCurrentUserStep(5);
 
-    expect(useAppSessionStore.getState().currentUserStep).toBe(5);
+    expect(useAppSessionStore.getState().currentSession.currentUserStep).toBe(5);
   });
 
   it("setNextStep increments the current step", () => {
@@ -31,7 +39,7 @@ describe("useAppSessionStore", () => {
     setCurrentUserStep(2);
     setNextStep();
 
-    expect(useAppSessionStore.getState().currentUserStep).toBe(3);
+    expect(useAppSessionStore.getState().currentSession.currentUserStep).toBe(3);
   });
 
   it("setMarkingResult stores a marking result", () => {
@@ -47,7 +55,7 @@ describe("useAppSessionStore", () => {
 
     setMarkingResult(0, result);
 
-    expect(useAppSessionStore.getState().markingResults[0]).toEqual(result);
+    expect(useAppSessionStore.getState().currentSession.markingResults[0]).toEqual(result);
   });
 
   it("clearUserSession resets state", () => {
@@ -68,7 +76,7 @@ describe("useAppSessionStore", () => {
     clearUserSession();
 
     const state = useAppSessionStore.getState();
-    expect(state.currentUserStep).toBe(null);
-    expect(state.markingResults).toEqual({});
+    expect(state.currentSession.currentUserStep).toBe(0);
+    expect(state.currentSession.markingResults).toEqual({});
   });
 });
