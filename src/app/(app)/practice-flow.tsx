@@ -1,4 +1,3 @@
-import LiveActivities from "@/modules/expo-live-activity";
 import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
 import React, { useEffect, useLayoutEffect, useState } from "react";
@@ -12,26 +11,11 @@ import ResultFeedback from "../../components/practice-flow/ResultFeedback";
 import SessionSummary from "../../components/practice-flow/SessionSummary";
 import SortQuestion from "../../components/practice-flow/SortQuestion";
 import { useMarkQuestion } from "../../hooks/useMarkQuestion";
+import { useOngoingActivity } from "../../hooks/useOngoingActivity";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
 import { MarkingResult, SortQuestionSpec } from "../../types";
-
-// Helper: Calculate consecutive correct answers from the current position backwards
-function calculateStreak(
-  markingResults: { [questionIndex: number]: MarkingResult },
-  currentStep: number
-): number {
-  let streak = 0;
-  for (let i = currentStep; i >= 0; i--) {
-    if (markingResults[i]?.isCorrect) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  return streak;
-}
 
 export default function PracticeScreen() {
   // ===== Routing & Data =====
@@ -42,13 +26,16 @@ export default function PracticeScreen() {
   // ===== Local State =====
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [sortAnswer, setSortAnswer] = useState<{ [key: string]: string[] }>({});
-  const [lockedItems, setLockedItems] = useState<{[key: string]: boolean}>({});
+  const [lockedItems, setLockedItems] = useState<{ [key: string]: boolean }>(
+    {}
+  );
   const [sortAttempts, setSortAttempts] = useState(0);
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // ===== Hooks =====
   const { isMarking, markAnswer } = useMarkQuestion();
+  const ongoingActivity = useOngoingActivity();
 
   // ===== Store State & Actions =====
   const currentSession = useAppSessionStore((state) => state.currentSession);
@@ -70,10 +57,12 @@ export default function PracticeScreen() {
   );
 
   // ===== Derived State =====
-  const currentUserStep = currentSession?.currentUserStep || 0;
-  const markingResults = currentSession?.markingResults || {};
+  const currentUserStep = currentSession.currentUserStep;
+  const markingResults = currentSession.markingResults;
   const currentQuestion = fullQuestionStepsList[currentUserStep];
   const markingResult = markingResults[currentUserStep];
+  const currentQuestionStartTiming =
+    currentSession.questionTimings[currentUserStep]?.startedAt;
 
   // ===== Effects =====
   // Redirect to home if no active session
@@ -85,22 +74,18 @@ export default function PracticeScreen() {
 
   // Start timing when question becomes visible
   useLayoutEffect(() => {
-    if (!currentSession?.questionTimings[currentUserStep]) {
+    if (!currentQuestionStartTiming) {
       const now = Date.now();
       startQuestionTiming(currentUserStep, now);
-
       // Update Live Activity with new question timer
-      if (
-        LiveActivities.areActivitiesEnabled() &&
-        LiveActivities.isActivityInProgress()
-      ) {
-        const completedCount = Object.keys(markingResults).length;
-        const questionsLeft = fullQuestionStepsList.length - completedCount;
-        const currentStreak = calculateStreak(markingResults, currentUserStep);
-        LiveActivities.updateActivity(questionsLeft, currentStreak, now / 1000);
-      }
+      ongoingActivity.updateTimer(now);
     }
-  }, [currentUserStep, currentSession, startQuestionTiming]);
+  }, [
+    currentQuestionStartTiming,
+    currentUserStep,
+    ongoingActivity,
+    startQuestionTiming,
+  ]);
 
   // ===== Early Returns (Loading/Error States) =====
   if (isLoading) {
@@ -128,6 +113,7 @@ export default function PracticeScreen() {
   }
 
   const handleCheck = async () => {
+    const completionTime = Date.now();
     const userAnswer =
       currentQuestion.questionData.questionType === "mcq"
         ? selectedAnswer!
@@ -141,8 +127,8 @@ export default function PracticeScreen() {
       setSortAttempts(newAttempts);
 
       // Get correct items from itemResults
-      const correctItems: {[key: string]: boolean} = {};
-      const incorrectItems: {[key: string]: boolean} = {};
+      const correctItems: { [key: string]: boolean } = {};
+      const incorrectItems: { [key: string]: boolean } = {};
 
       if (result.itemResults) {
         Object.entries(result.itemResults).forEach(([item, isCorrect]) => {
@@ -174,36 +160,21 @@ export default function PracticeScreen() {
     }
 
     // If fully correct, MCQ, or max attempts reached, complete the question
-    const completionTime = Date.now();
     setMarkingResult(currentUserStep, result);
     completeQuestionTiming(currentUserStep, completionTime);
 
-    // Update Live Activity with new progress and null timer
-    updateLiveActivity(result, true);
-  };
-
-  const updateLiveActivity = (
-    newResult: MarkingResult,
-    clearTimer: boolean = false
-  ) => {
-    const updatedResults = { ...markingResults, [currentUserStep]: newResult };
-    const currentStreak = calculateStreak(updatedResults, currentUserStep);
-
     // Update best streak in session
+    const updatedResults = { ...markingResults, [currentUserStep]: result };
+    const currentStreak = calculateStreak(updatedResults, currentUserStep);
     updateBestStreak(currentStreak);
 
-    // Update Live Activity if enabled
-    if (
-      LiveActivities.areActivitiesEnabled() &&
-      LiveActivities.isActivityInProgress()
-    ) {
-      const completedCount = Object.keys(updatedResults).length;
-      const questionsLeft = fullQuestionStepsList.length - completedCount;
-      const startTime = clearTimer
-        ? null
-        : (currentSession?.startedAt || Date.now()) / 1000;
-      LiveActivities.updateActivity(questionsLeft, currentStreak, startTime);
-    }
+    // Update Live Activity
+    const completedCount = Object.keys(updatedResults).length;
+    ongoingActivity.updateProgress(
+      fullQuestionStepsList.length,
+      completedCount,
+      currentStreak
+    );
   };
 
   const handleContinue = () => {
@@ -225,7 +196,7 @@ export default function PracticeScreen() {
   };
 
   const finishSession = (status: "completed" | "abandoned") => {
-    LiveActivities.endActivity();
+    ongoingActivity.endSession();
     commitCurrentSession(status);
     router.back();
   };
@@ -372,4 +343,20 @@ export default function PracticeScreen() {
       </Dialog>
     </SafeAreaView>
   );
+}
+
+// Helper: Calculate consecutive correct answers from the current position backwards
+function calculateStreak(
+  markingResults: { [questionIndex: number]: MarkingResult },
+  currentStep: number
+): number {
+  let streak = 0;
+  for (let i = currentStep; i >= 0; i--) {
+    if (markingResults[i]?.isCorrect) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
 }

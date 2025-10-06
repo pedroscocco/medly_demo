@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import { MarkingResult } from "../types";
 
-export type SessionStatus = "in-progress" | "abandoned" | "completed";
+export type SessionStatus =
+  | "not-started"
+  | "in-progress"
+  | "abandoned"
+  | "completed";
 
 export interface QuestionTiming {
   startedAt: number;
@@ -10,7 +14,7 @@ export interface QuestionTiming {
 
 export interface SessionHistory {
   sessionId: string;
-  currentUserStep: number | null;
+  currentUserStep: number;
   markingResults: { [questionIndex: number]: MarkingResult };
   questionTimings: { [questionIndex: number]: QuestionTiming };
   startedAt: number;
@@ -20,13 +24,13 @@ export interface SessionHistory {
 }
 
 interface AppState {
-  currentSession: SessionHistory | null;
+  currentSession: SessionHistory;
   sessionHistory: { [sessionId: string]: SessionHistory };
 }
 
 interface AppActions {
   setNextStep: () => void;
-  setCurrentUserStep: (sessionStep: number | null) => void;
+  setCurrentUserStep: (sessionStep: number) => void;
   setMarkingResult: (questionIndex: number, result: MarkingResult) => void;
   updateBestStreak: (currentStreak: number) => void;
   startQuestionTiming: (questionIndex: number, time?: number) => void;
@@ -40,68 +44,67 @@ interface AppActions {
 
 export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
   // State
-  currentSession: null,
+  currentSession: {
+    sessionId: "",
+    currentUserStep: 0,
+    markingResults: {},
+    questionTimings: {},
+    startedAt: 0,
+    sessionStatus: "not-started",
+    bestStreak: 0,
+  },
   sessionHistory: {},
 
   // Actions
   setNextStep: () =>
     set((state) => ({
-      currentSession: state.currentSession
-        ? {
-            ...state.currentSession,
-            currentUserStep: (state.currentSession.currentUserStep || 0) + 1,
-          }
-        : null,
+      currentSession: {
+        ...state.currentSession,
+        currentUserStep: (state.currentSession.currentUserStep || 0) + 1,
+      },
     })),
-  setCurrentUserStep: (sessionStep: number | null) =>
+  setCurrentUserStep: (sessionStep: number) =>
     set((state) => ({
-      currentSession: state.currentSession
-        ? {
-            ...state.currentSession,
-            currentUserStep: sessionStep,
-          }
-        : null,
+      currentSession: {
+        ...state.currentSession,
+        currentUserStep: sessionStep,
+      },
     })),
   setMarkingResult: (questionIndex: number, result: MarkingResult) =>
     set((state) => ({
-      currentSession: state.currentSession
-        ? {
-            ...state.currentSession,
-            markingResults: {
-              ...state.currentSession.markingResults,
-              [questionIndex]: result,
-            },
-          }
-        : null,
+      currentSession: {
+        ...state.currentSession,
+        markingResults: {
+          ...state.currentSession.markingResults,
+          [questionIndex]: result,
+        },
+      },
     })),
   updateBestStreak: (currentStreak: number) =>
     set((state) => ({
-      currentSession: state.currentSession
-        ? {
-            ...state.currentSession,
-            bestStreak: Math.max(state.currentSession.bestStreak, currentStreak),
-          }
-        : null,
+      currentSession: {
+        ...state.currentSession,
+        bestStreak: Math.max(state.currentSession.bestStreak, currentStreak),
+      },
     })),
   startQuestionTiming: (questionIndex: number, time?: number) =>
     set((state) => ({
-      currentSession: state.currentSession
-        ? {
-            ...state.currentSession,
-            questionTimings: {
-              ...state.currentSession.questionTimings,
-              [questionIndex]: {
-                startedAt: time || Date.now(),
-              },
-            },
-          }
-        : null,
+      currentSession: {
+        ...state.currentSession,
+        questionTimings: {
+          ...state.currentSession.questionTimings,
+          [questionIndex]: {
+            startedAt: time || Date.now(),
+          },
+        },
+      },
     })),
   completeQuestionTiming: (questionIndex: number, time?: number) =>
     set((state) => {
       if (!state.currentSession) return state;
 
-      const existingTiming = state.currentSession.questionTimings[questionIndex];
+      const existingTiming =
+        state.currentSession.questionTimings[questionIndex];
       if (!existingTiming) return state;
 
       return {
@@ -119,7 +122,15 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
     }),
   clearUserSession: () =>
     set({
-      currentSession: null,
+      currentSession: {
+        sessionId: "",
+        currentUserStep: 0,
+        markingResults: {},
+        questionTimings: {},
+        startedAt: 0,
+        sessionStatus: "not-started",
+        bestStreak: 0,
+      },
     }),
   startNewSession: (sessionId: string, startTime: number = Date.now()) =>
     set({
@@ -144,7 +155,15 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
       };
 
       return {
-        currentSession: null,
+        currentSession: {
+          sessionId: "",
+          currentUserStep: 0,
+          markingResults: {},
+          questionTimings: {},
+          startedAt: 0,
+          sessionStatus: "not-started",
+          bestStreak: 0,
+        },
         sessionHistory: {
           ...state.sessionHistory,
           [state.currentSession.sessionId]: completedSession,

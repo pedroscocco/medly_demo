@@ -4,18 +4,18 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useOngoingActivity } from "../../hooks/useOngoingActivity";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
 import { styles } from "../../styles/HomeScreen.styles";
-
-import LiveActivities from "@/modules/expo-live-activity";
 
 export default function Index() {
   const { signOut } = useAuthSession();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useSessionQuery();
+  const ongoingActivity = useOngoingActivity();
   const currentSession = useAppSessionStore((state) => state.currentSession);
   const startNewSession = useAppSessionStore((state) => state.startNewSession);
   const commitCurrentSession = useAppSessionStore(
@@ -37,18 +37,13 @@ export default function Index() {
     // Start a new session
     startNewSession(data.sessionId.toString(), startTime);
 
-    // Start Live Activity
-    if (LiveActivities.areActivitiesEnabled()) {
-      if (LiveActivities.isActivityInProgress()) {
-        LiveActivities.endActivity();
-      }
-      LiveActivities.startActivity(
-        "Learnly Practice",
-        startTime / 1000,
-        data.steps.length,
-        0
-      );
-    }
+    // Start ongoing activity
+    ongoingActivity.startSession(
+      "Learnly Practice",
+      startTime,
+      data.steps.length
+    );
+
     router.push("./practice-flow");
   };
 
