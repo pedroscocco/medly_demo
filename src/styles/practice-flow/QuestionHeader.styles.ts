@@ -5,7 +5,6 @@ import {
   colors,
   fontSize,
   fontWeight,
-  iconSizes,
   progressBarHeight,
   spacing,
 } from "../designSystem";
@@ -45,7 +44,6 @@ export const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   progressEmoji: {
-    fontSize: fontSize.lg,
     position: "absolute",
     top: -8,
     marginLeft: -12,

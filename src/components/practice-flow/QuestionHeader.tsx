@@ -1,6 +1,8 @@
+import { fontSize } from "@/src/styles/designSystem";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import { styles } from "../../styles/practice-flow/QuestionHeader.styles";
 
 interface QuestionHeaderProps {
@@ -65,17 +67,19 @@ export default function QuestionHeader({
 
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
-            <View
+            <Animated.View
+              layout={LinearTransition}
               style={[styles.progressFill, { width: `${progressPercentage}%` }]}
             />
-            <Text
+            <Animated.View
+              layout={LinearTransition}
               style={[
                 styles.progressEmoji,
                 { left: `${Math.min(progressPercentage, 100)}%` },
               ]}
             >
-              🦊
-            </Text>
+              <Text style={{ fontSize: fontSize.lg }}>🦊</Text>
+            </Animated.View>
           </View>
         </View>
 

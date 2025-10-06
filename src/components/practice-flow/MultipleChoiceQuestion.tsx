@@ -1,6 +1,8 @@
 import { Text, TouchableOpacity, View } from "react-native";
+import Animated from "react-native-reanimated";
 import { styles } from "../../styles/practice-flow/MultipleChoiceQuestion.styles";
 import { AnswerOption, MarkingResult } from "../../types";
+import { swipeEntering, swipeExiting } from "../../utils/swipeAnimations";
 
 interface MultipleChoiceQuestionProps {
   heading: string;
@@ -9,6 +11,7 @@ interface MultipleChoiceQuestionProps {
   onSelectAnswer: (answer: string) => void;
   disabled?: boolean;
   markingResult?: MarkingResult | null;
+  isFirstQuestion?: boolean;
 }
 
 export default function MultipleChoiceQuestion({
@@ -18,11 +21,16 @@ export default function MultipleChoiceQuestion({
   onSelectAnswer,
   disabled = false,
   markingResult = null,
+  isFirstQuestion = false,
 }: MultipleChoiceQuestionProps) {
   const isCorrect = markingResult?.isCorrect;
 
   return (
-    <>
+    <Animated.View
+      entering={isFirstQuestion ? undefined : swipeEntering}
+      exiting={swipeExiting}
+      key={heading}
+    >
       {/* Question Card */}
       <View style={styles.questionCard}>
         <Text style={styles.questionText}>{heading}</Text>
@@ -59,6 +67,6 @@ export default function MultipleChoiceQuestion({
           );
         })}
       </View>
-    </>
+    </Animated.View>
   );
 }

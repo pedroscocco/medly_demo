@@ -308,6 +308,7 @@ export default function PracticeScreen() {
           onSelectAnswer={setSelectedAnswer}
           disabled={!!markingResult}
           markingResult={markingResult}
+          isFirstQuestion={currentUserStep === 0 && Object.keys(markingResults).length === 0}
         />
       ) : currentQuestion.questionData.questionType === "sort" ? (
         <SortQuestion
@@ -322,6 +323,7 @@ export default function PracticeScreen() {
           onAnswerChange={handleSortAnswerChange}
           disabled={!!markingResult}
           lockedItems={lockedItems}
+          isFirstQuestion={currentUserStep === 0 && Object.keys(markingResults).length === 0}
         />
       ) : (
         <View style={styles.centerContainer}>

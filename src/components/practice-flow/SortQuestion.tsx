@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 import { styles } from "../../styles/practice-flow/SortQuestion.styles";
 import { AnswerOption } from "../../types";
+import { swipeEntering, swipeExiting } from "../../utils/swipeAnimations";
 import CategoryBox from "./CategoryBox";
 import DraggableItem from "./DraggableItem";
 import { DropZonesProvider } from "./DropZonesContext";
@@ -14,6 +16,7 @@ interface SortQuestionProps {
   onAnswerChange: (categoryMapping: { [key: string]: string[] }) => void;
   disabled?: boolean;
   lockedItems?: { [key: string]: boolean };
+  isFirstQuestion?: boolean;
 }
 
 export default function SortQuestion({
@@ -24,6 +27,7 @@ export default function SortQuestion({
   onAnswerChange,
   disabled = false,
   lockedItems = {},
+  isFirstQuestion = false,
 }: SortQuestionProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
@@ -59,7 +63,11 @@ export default function SortQuestion({
 
   return (
     <DropZonesProvider>
-      <View>
+      <Animated.View
+        entering={isFirstQuestion ? undefined : swipeEntering}
+        exiting={swipeExiting}
+        key={heading}
+      >
         {/* Question Card */}
         <View style={styles.questionCard}>
           <Text style={styles.questionText}>{heading}</Text>
@@ -106,7 +114,7 @@ export default function SortQuestion({
             ))}
           </View>
         )}
-      </View>
+      </Animated.View>
     </DropZonesProvider>
   );
 }

@@ -1,8 +1,14 @@
 import { useAuthSession } from "@/src/authentication/AuthSessionProvider";
+import AnimatedFox from "@/src/components/AnimatedFox";
 import { onlineManager, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useOngoingActivity } from "../../hooks/ongoing_activity/useOngoingActivity";
 import { useNetworkStatus } from "../../hooks/useNetworkStatus";
@@ -70,9 +76,7 @@ export default function Index() {
       </View>
 
       {/* Fox Emoji */}
-      <View style={styles.homescreenEmojiContainer}>
-        <Text style={styles.homescreenEmoji}>🦊</Text>
-      </View>
+      <AnimatedFox/>
 
       {/* Loading State */}
       {isLoading && (

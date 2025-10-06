@@ -4,12 +4,12 @@ import { colors, fontSize, fontWeight, spacing } from "../designSystem";
 export const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 0,
+    bottom: -30, //Space for bounce animation
     left: 0,
     right: 0,
     paddingHorizontal: spacing.xxl,
     paddingTop: spacing.lg,
-    paddingBottom: 105, // Space for the button
+    paddingBottom: 135, // Space for the button
   },
   containerCorrect: {
     backgroundColor: colors.successLight,
