@@ -292,6 +292,9 @@ export default function PracticeScreen() {
         totalSteps={fullQuestionStepsList.length}
         questionType={getQuestionTypeLabel()}
         onClose={handleClose}
+        isCompleted={showSuccessDialog}
+        questionStartTime={currentQuestionStartTiming}
+        isMarked={!!markingResult}
       />
       {currentQuestion.questionData.questionType === "mcq" ? (
         <MultipleChoiceQuestion

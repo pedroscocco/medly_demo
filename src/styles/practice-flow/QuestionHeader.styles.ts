@@ -30,16 +30,14 @@ export const styles = StyleSheet.create({
   },
   progressContainer: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   progressBar: {
-    flex: 1,
     height: progressBarHeight,
     backgroundColor: colors.gray200,
     borderRadius: borderRadius.sm,
-    overflow: "hidden",
+    overflow: "visible",
+    position: "relative",
   },
   progressFill: {
     height: "100%",
@@ -48,20 +46,24 @@ export const styles = StyleSheet.create({
   },
   progressEmoji: {
     fontSize: fontSize.lg,
+    position: "absolute",
+    top: -8,
+    marginLeft: -12,
   },
-  counterContainer: {
+  timerContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
   },
-  counterIcon: {
-    fontSize: iconSizes.sm,
+  clockIcon: {
     color: colors.primary,
   },
-  counterText: {
+  timerText: {
     fontSize: fontSize.xs,
     color: colors.primary,
     fontWeight: fontWeight.semibold,
+    fontVariant: ["tabular-nums"],
+    minWidth: 32,
   },
   badgeContainer: {
     paddingHorizontal: spacing.xxl,
