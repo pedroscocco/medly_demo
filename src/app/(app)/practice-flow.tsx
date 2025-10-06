@@ -1,3 +1,4 @@
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
 import React, { useEffect, useLayoutEffect, useState } from "react";
@@ -38,6 +39,7 @@ export default function PracticeScreen() {
   const { isMarking, markAnswer } = useMarkQuestion();
   const ongoingActivity = useOngoingActivity();
   const { completeSession } = useCompleteSession();
+  const NetworkToast = useNetworkStatus();
 
   // ===== Store State & Actions =====
   const currentSession = useAppSessionStore((state) => state.currentSession);
@@ -373,6 +375,7 @@ export default function PracticeScreen() {
           bestStreak={currentSession?.bestStreak || 0}
         />
       </Dialog>
+      <NetworkToast />
     </SafeAreaView>
   );
 }
