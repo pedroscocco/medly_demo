@@ -1,4 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { MarkingResult } from "../types";
 
 export type SessionStatus =
@@ -42,7 +44,9 @@ interface AppActions {
   getSessionHistory: (sessionId: string) => SessionHistory | undefined;
 }
 
-export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
+export const useAppSessionStore = create<AppState & AppActions>()(
+  persist(
+    (set, get) => ({
   // State
   currentSession: {
     sessionId: "",
@@ -185,4 +189,10 @@ export const useAppSessionStore = create<AppState & AppActions>((set, get) => ({
   getSessionHistory: (sessionId: string) => {
     return get().sessionHistory[sessionId];
   },
-}));
+    }),
+    {
+      name: "app-session-storage",
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
