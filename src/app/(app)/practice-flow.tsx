@@ -42,6 +42,8 @@ export default function PracticeScreen() {
   // ===== Local State =====
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [sortAnswer, setSortAnswer] = useState<{ [key: string]: string[] }>({});
+  const [lockedItems, setLockedItems] = useState<{[key: string]: boolean}>({});
+  const [sortAttempts, setSortAttempts] = useState(0);
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
@@ -88,7 +90,10 @@ export default function PracticeScreen() {
       startQuestionTiming(currentUserStep, now);
 
       // Update Live Activity with new question timer
-      if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
+      if (
+        LiveActivities.areActivitiesEnabled() &&
+        LiveActivities.isActivityInProgress()
+      ) {
         const completedCount = Object.keys(markingResults).length;
         const questionsLeft = fullQuestionStepsList.length - completedCount;
         const currentStreak = calculateStreak(markingResults, currentUserStep);
@@ -122,7 +127,6 @@ export default function PracticeScreen() {
     );
   }
 
-  // ===== Event Handlers =====
   const handleCheck = async () => {
     const userAnswer =
       currentQuestion.questionData.questionType === "mcq"
@@ -130,8 +134,47 @@ export default function PracticeScreen() {
         : sortAnswer;
 
     const result = await markAnswer(currentQuestion, userAnswer);
-    const completionTime = Date.now();
 
+    // For sort questions, do partial checking (max 3 attempts)
+    if (currentQuestion.questionData.questionType === "sort") {
+      const newAttempts = sortAttempts + 1;
+      setSortAttempts(newAttempts);
+
+      // Get correct items from itemResults
+      const correctItems: {[key: string]: boolean} = {};
+      const incorrectItems: {[key: string]: boolean} = {};
+
+      if (result.itemResults) {
+        Object.entries(result.itemResults).forEach(([item, isCorrect]) => {
+          if (isCorrect) {
+            correctItems[item] = true;
+          } else {
+            incorrectItems[item] = true;
+          }
+        });
+      }
+
+      // Update locked items with newly correct items
+      setLockedItems(correctItems);
+
+      // If not fully correct and haven't reached max attempts, continue practicing
+      if (result.isCorrect === false && newAttempts < 3) {
+        // Remove incorrect items from categories
+        const newSortAnswer: { [key: string]: string[] } = {};
+        Object.entries(sortAnswer).forEach(([category, items]) => {
+          newSortAnswer[category] = items.filter(
+            (item) => !incorrectItems[item]
+          );
+        });
+        setSortAnswer(newSortAnswer);
+
+        // Don't set marking result yet - keep practicing
+        return;
+      }
+    }
+
+    // If fully correct, MCQ, or max attempts reached, complete the question
+    const completionTime = Date.now();
     setMarkingResult(currentUserStep, result);
     completeQuestionTiming(currentUserStep, completionTime);
 
@@ -139,7 +182,10 @@ export default function PracticeScreen() {
     updateLiveActivity(result, true);
   };
 
-  const updateLiveActivity = (newResult: MarkingResult, clearTimer: boolean = false) => {
+  const updateLiveActivity = (
+    newResult: MarkingResult,
+    clearTimer: boolean = false
+  ) => {
     const updatedResults = { ...markingResults, [currentUserStep]: newResult };
     const currentStreak = calculateStreak(updatedResults, currentUserStep);
 
@@ -147,10 +193,15 @@ export default function PracticeScreen() {
     updateBestStreak(currentStreak);
 
     // Update Live Activity if enabled
-    if (LiveActivities.areActivitiesEnabled() && LiveActivities.isActivityInProgress()) {
+    if (
+      LiveActivities.areActivitiesEnabled() &&
+      LiveActivities.isActivityInProgress()
+    ) {
       const completedCount = Object.keys(updatedResults).length;
       const questionsLeft = fullQuestionStepsList.length - completedCount;
-      const startTime = clearTimer ? null : (currentSession?.startedAt || Date.now()) / 1000;
+      const startTime = clearTimer
+        ? null
+        : (currentSession?.startedAt || Date.now()) / 1000;
       LiveActivities.updateActivity(questionsLeft, currentStreak, startTime);
     }
   };
@@ -169,6 +220,8 @@ export default function PracticeScreen() {
     setNextStep();
     setSelectedAnswer(null);
     setSortAnswer({});
+    setLockedItems({});
+    setSortAttempts(0);
   };
 
   const finishSession = (status: "completed" | "abandoned") => {
@@ -260,6 +313,7 @@ export default function PracticeScreen() {
           }
           onAnswerChange={handleSortAnswerChange}
           disabled={!!markingResult}
+          lockedItems={lockedItems}
         />
       ) : (
         <View style={styles.centerContainer}>

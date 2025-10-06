@@ -96,4 +96,11 @@ export const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: fontWeight.medium,
   },
+  draggableItemLocked: {
+    backgroundColor: colors.successLight,
+    borderColor: colors.success,
+  },
+  draggableItemLockedText: {
+    color: colors.success,
+  },
 });

@@ -13,6 +13,7 @@ interface SortQuestionProps {
   currentAnswer: { [key: string]: string[] };
   onAnswerChange: (categoryMapping: { [key: string]: string[] }) => void;
   disabled?: boolean;
+  lockedItems?: { [key: string]: boolean };
 }
 
 export default function SortQuestion({
@@ -22,6 +23,7 @@ export default function SortQuestion({
   currentAnswer,
   onAnswerChange,
   disabled = false,
+  lockedItems = {},
 }: SortQuestionProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
@@ -33,6 +35,9 @@ export default function SortQuestion({
 
   const handleDrop = (item: string, categoryId: string) => {
     if (disabled) return;
+
+    // Don't allow moving locked items
+    if (!!lockedItems[item]) return;
 
     // Ensure all categories exist in the answer object
     const newCategoryItems: { [key: string]: string[] } = {};
@@ -78,6 +83,7 @@ export default function SortQuestion({
                       text={item}
                       onDrop={handleDrop}
                       onHover={setHoveredCategory}
+                      isLocked={!!lockedItems[item]}
                     />
                   ))}
                 </View>
@@ -95,6 +101,7 @@ export default function SortQuestion({
                 text={item}
                 onDrop={handleDrop}
                 onHover={setHoveredCategory}
+                isLocked={false}
               />
             ))}
           </View>

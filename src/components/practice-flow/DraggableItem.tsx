@@ -16,12 +16,14 @@ interface DraggableItemProps {
   text: string;
   onDrop?: (item: string, zoneId: string) => void;
   onHover?: (zoneId: string | null) => void;
+  isLocked?: boolean;
 }
 
 export default function DraggableItem({
   text,
   onDrop,
   onHover,
+  isLocked = false,
 }: DraggableItemProps) {
   const { dropZones, triggerRemeasure } = useDropZones();
   const itemCenterX = useSharedValue(0);
@@ -47,13 +49,13 @@ export default function DraggableItem({
   };
 
   const pan = Gesture.Pan()
+    .enabled(!isLocked)
     .onBegin((event) => {
       // Trigger all drop zones to re-measure
       runOnJS(triggerRemeasure)();
 
       const measured = measure(animatedRef);
       if (measured) {
-        console.log(text, measured);
         itemCenterX.value = measured.pageX + measured.width / 2;
         itemCenterY.value = measured.pageY + measured.height / 2;
       }
@@ -102,9 +104,20 @@ export default function DraggableItem({
     <GestureDetector gesture={pan}>
       <Animated.View
         ref={animatedRef}
-        style={[styles.draggableItem, animatedStyle]}
+        style={[
+          styles.draggableItem,
+          isLocked && styles.draggableItemLocked,
+          animatedStyle,
+        ]}
       >
-        <Text style={styles.draggableItemText}>{text}</Text>
+        <Text
+          style={[
+            styles.draggableItemText,
+            isLocked && styles.draggableItemLockedText,
+          ]}
+        >
+          {text}
+        </Text>
       </Animated.View>
     </GestureDetector>
   );
