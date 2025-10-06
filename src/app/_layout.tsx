@@ -2,12 +2,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { Stack } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   AuthSessionProvider,
   useAuthSession,
 } from "../authentication/AuthSessionProvider";
+
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,7 +44,10 @@ export default function RootLayout() {
 }
 
 const RootNavigator = () => {
-  const { authSession } = useAuthSession();
+  const { authSession, isLoading } = useAuthSession();
+  if (!isLoading) {
+    SplashScreen.hide();
+  }
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!authSession}>
