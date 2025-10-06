@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useOngoingActivity } from "../../hooks/useOngoingActivity";
+import { useOngoingActivity } from "../../hooks/ongoing_activity/useOngoingActivity";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";

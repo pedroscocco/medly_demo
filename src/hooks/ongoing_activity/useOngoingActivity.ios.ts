@@ -35,7 +35,6 @@ export function useOngoingActivity() {
 
     const questionsLeft = totalQuestions - completedCount;
     const startTime = questionStartTime ? questionStartTime / 1000 : null;
-    console.log("Updating Live Activity", { questionsLeft, currentStreak, startTime });
     LiveActivities.updateActivity(questionsLeft, currentStreak, startTime);
   };
 

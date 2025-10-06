@@ -131,6 +131,7 @@ type SessionCompleteParams = {
 };
 
 function sessions_complete(method: Method, params: SessionCompleteParams) {
+  console.log(params);
   switch (method) {
     case "POST":
       return {

@@ -10,8 +10,9 @@ import QuestionHeader from "../../components/practice-flow/QuestionHeader";
 import ResultFeedback from "../../components/practice-flow/ResultFeedback";
 import SessionSummary from "../../components/practice-flow/SessionSummary";
 import SortQuestion from "../../components/practice-flow/SortQuestion";
+import { useOngoingActivity } from "../../hooks/ongoing_activity/useOngoingActivity";
+import { useCompleteSession } from "../../hooks/useCompleteSession";
 import { useMarkQuestion } from "../../hooks/useMarkQuestion";
-import { useOngoingActivity } from "../../hooks/useOngoingActivity";
 import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
@@ -36,6 +37,7 @@ export default function PracticeScreen() {
   // ===== Hooks =====
   const { isMarking, markAnswer } = useMarkQuestion();
   const ongoingActivity = useOngoingActivity();
+  const { completeSession } = useCompleteSession();
 
   // ===== Store State & Actions =====
   const currentSession = useAppSessionStore((state) => state.currentSession);
@@ -181,6 +183,9 @@ export default function PracticeScreen() {
     const isLastQuestion = currentUserStep >= fullQuestionStepsList.length - 1;
 
     if (isLastQuestion) {
+      // Complete session async
+      callCompleteSession();
+      // Show success dialog
       setShowSuccessDialog(true);
     } else {
       moveToNextQuestion();
@@ -193,6 +198,33 @@ export default function PracticeScreen() {
     setSortAnswer({});
     setLockedItems({});
     setSortAttempts(0);
+  };
+
+  const callCompleteSession = async () => {
+    // Calculate time spent per question in seconds
+    const timeSpentPerQuestion = Object.keys(currentSession.questionTimings)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((key) => {
+        const timing = currentSession.questionTimings[Number(key)];
+        if (timing.completedAt && timing.startedAt) {
+          return Math.round((timing.completedAt - timing.startedAt) / 1000);
+        }
+        return 0;
+      });
+
+    // Count correct answers
+    const correctAnswers = Object.values(currentSession.markingResults).filter(
+      (result) => result.isCorrect
+    ).length;
+
+    completeSession({
+      sessionId: currentSession.sessionId,
+      totalQuestions: fullQuestionStepsList.length,
+      correctAnswers,
+      timeSpentPerQuestion,
+      questionStreak: currentSession.bestStreak,
+      completedAt: new Date().toISOString(),
+    });
   };
 
   const finishSession = (status: "completed" | "abandoned") => {
