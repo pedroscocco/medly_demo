@@ -116,8 +116,8 @@ function createNewSession() {
 
   return {
     sessionId: Math.random().toString(36).substring(2, 15),
-    steps: selectedQuestionSteps,
-    // steps: [MOCK_QUESTION_STEPS.steps[1], ...selectedQuestionSteps],
+    // steps: selectedQuestionSteps,
+    steps: [MOCK_QUESTION_STEPS.steps[1], ...selectedQuestionSteps],
   };
 }
 

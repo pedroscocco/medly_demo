@@ -8,8 +8,8 @@ export const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: spacing.xxl,
-    paddingTop: spacing.xxl,
-    paddingBottom: 100, // Space for the button
+    paddingTop: spacing.lg,
+    paddingBottom: 105, // Space for the button
   },
   containerCorrect: {
     backgroundColor: colors.successLight,

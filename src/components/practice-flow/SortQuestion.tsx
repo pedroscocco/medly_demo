@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "../../styles/practice-flow/SortQuestion.styles";
 import { AnswerOption } from "../../types";
+import DraggableItem from "./DraggableItem";
 
 interface SortQuestionProps {
   heading: string;
@@ -85,14 +86,16 @@ export default function SortQuestion({
             >
               <Text style={styles.categoryLabel}>{category}</Text>
               <View style={styles.categoryItems}>
-                {currentAnswer[category]?.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.itemInCategory}
+                {currentAnswer[category]?.map((item) => (
+                  <DraggableItem
+                    key={item}
+                    text={item}
+                    isSelected={selectedItem === item}
                     onPress={() => handleItemInCategoryPress(item, category)}
-                  >
-                    <Text style={styles.itemInCategoryText}>{item}</Text>
-                  </TouchableOpacity>
+                    style={styles.itemInCategory}
+                    activeStyle={styles.draggableItemActive}
+                    textStyle={styles.itemInCategoryText}
+                  />
                 ))}
               </View>
             </TouchableOpacity>
@@ -103,17 +106,16 @@ export default function SortQuestion({
       {/* Draggable Items Area */}
       {unassignedItems.length > 0 && (
         <View style={styles.draggableArea}>
-          {unassignedItems.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.draggableItem,
-                selectedItem === item && styles.draggableItemActive,
-              ]}
+          {unassignedItems.map((item) => (
+            <DraggableItem
+              key={item}
+              text={item}
+              isSelected={selectedItem === item}
               onPress={() => handleItemPress(item)}
-            >
-              <Text style={styles.draggableItemText}>{item}</Text>
-            </TouchableOpacity>
+              style={styles.draggableItem}
+              activeStyle={styles.draggableItemActive}
+              textStyle={styles.draggableItemText}
+            />
           ))}
         </View>
       )}

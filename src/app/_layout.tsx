@@ -5,6 +5,7 @@ import {
   AuthSessionProvider,
   useAuthSession,
 } from "../authentication/AuthSessionProvider";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const queryClient = new QueryClient();
 
@@ -12,11 +13,13 @@ export default function RootLayout() {
   console.log('Initializing Expo Live Activity Module');
   console.log(ExpoLiveActivityModule);
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthSessionProvider>
-        <RootNavigator />
-      </AuthSessionProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthSessionProvider>
+          <RootNavigator />
+        </AuthSessionProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
 
