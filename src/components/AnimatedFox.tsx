@@ -34,8 +34,10 @@ const nodEntering = (targetValues: any) => {
 };
 
 export default function AnimatedFox() {
+  // ===== Hooks =====
   const rollAngle = useSharedValue("0deg");
 
+  // ===== Handlers and Callbacks =====
   const handlePress = () => {
     rollAngle.value = withSequence(
       withTiming("-30deg", { duration: 350 }),
@@ -44,6 +46,7 @@ export default function AnimatedFox() {
     );
   };
 
+  // ===== Render =====
   return (
     <Animated.View
       entering={nodEntering}

@@ -10,8 +10,10 @@ interface ResultFeedbackProps {
 }
 
 export default function ResultFeedback({ markingResult }: ResultFeedbackProps) {
+  // ===== Derived State =====
   const { isCorrect, score } = markingResult;
 
+  // ===== Render =====
   return (
     <Animated.View
       entering={BounceInDown.duration(700)}

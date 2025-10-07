@@ -1,6 +1,12 @@
 import LiveActivities from "@/modules/expo-live-activity";
+import { useEffect } from "react";
 
 export function useOngoingActivity() {
+  // Setup a clean-up effect.
+  useEffect(() => {
+    return () => endSession();
+  }, []);
+
   const startSession = (
     lessonName: string,
     startTime: number,

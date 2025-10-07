@@ -22,8 +22,18 @@ const usersById: { [id: string]: User } = {
   },
 };
 
+// Token storage with expiration
+type TokenData = {
+  userId: string;
+  expiresAt: number; // Unix timestamp in milliseconds
+};
+
+const tokens: { [token: string]: TokenData | null } = {};
+
+// Token expiration time: 24 hours
+const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000;
+
 let nextUserId = 3214; // Start after mock user ID
-let currentSignedInUserId: string | null = null;
 
 type Method = "GET" | "POST";
 
@@ -39,6 +49,7 @@ export default async function myfetch(
   path: string,
   method: Method = "GET",
   params?: any,
+  token?: string,
 ): Promise<Response> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   try {
@@ -46,12 +57,12 @@ export default async function myfetch(
       case "/sessions/questions":
         return {
           code: "200",
-          data: sessions_questions(method),
+          data: sessions_questions(method, token),
         };
       case "/sessions/complete":
         return {
           code: "200",
-          data: sessions_complete(method, params),
+          data: sessions_complete(method, params, token),
         };
       case "/auth/login":
         return {
@@ -66,7 +77,7 @@ export default async function myfetch(
       case "/currentUser":
         return {
           code: "200",
-          data: get_current_user(method),
+          data: get_current_user(method, token),
         };
       default:
         return { code: "400", error: "Unknown endpoint" };
@@ -90,9 +101,45 @@ class ApiError extends Error {
   }
 }
 
-function sessions_questions(method: Method) {
+// Helper function to generate a new token
+function generateToken(): string {
+  return Math.random().toString(36).substring(2, 15) +
+         Math.random().toString(36).substring(2, 15);
+}
+
+// Helper function to store a token with expiration
+function storeToken(userId: string): string {
+  const token = generateToken();
+  const expiresAt = Date.now() + TOKEN_EXPIRATION_MS;
+  tokens[token] = { userId, expiresAt };
+  return token;
+}
+
+// Helper function to validate a token
+function validateToken(token: string | undefined): string {
+  if (!token) {
+    throw new ApiError("400", "No token provided");
+  }
+
+  const tokenData = tokens[token];
+  if (!tokenData) {
+    throw new ApiError("400", "Invalid token");
+  }
+
+  if (Date.now() > tokenData.expiresAt) {
+    // Clean up expired token
+    tokens[token] = null;
+    throw new ApiError("400", "Token expired");
+  }
+
+  return tokenData.userId;
+}
+
+function sessions_questions(method: Method, token?: string) {
   switch (method) {
     case "GET":
+      // Validate token
+      validateToken(token);
       return createNewSession();
     default:
       throw new ApiError("400", "Unsupported method");
@@ -130,10 +177,11 @@ type SessionCompleteParams = {
   completedAt: string; // ISO timestamp
 };
 
-function sessions_complete(method: Method, params: SessionCompleteParams) {
-  console.log(params);
+function sessions_complete(method: Method, params: SessionCompleteParams, token?: string) {
   switch (method) {
     case "POST":
+      // Validate token
+      validateToken(token);
       return {
         updatedUser: MOCK_USER_DATA,
       };
@@ -161,14 +209,14 @@ function auth_login(
         throw new ApiError("400", "Invalid password");
       }
 
-      // Store signed-in user ID
-      currentSignedInUserId = user.id;
+      // Generate and store token with expiration
+      const token = storeToken(user.id);
 
       // Return user data without password
       const { password, ...userData } = user;
       return {
         user: userData,
-        token: Math.random().toString(36).substring(2, 15),
+        token,
       };
     default:
       throw new ApiError("400", "Unsupported method");
@@ -199,28 +247,27 @@ function auth_signup(
       // Add to hash map
       usersById[newUser.id] = newUser;
 
-      // Store signed-in user ID
-      currentSignedInUserId = newUser.id;
+      // Generate and store token with expiration
+      const token = storeToken(newUser.id);
 
       // Return user data without password
       const { password, ...userData } = newUser;
       return {
         user: userData,
-        token: Math.random().toString(36).substring(2, 15),
+        token,
       };
     default:
       throw new ApiError("400", "Unsupported method");
   }
 }
 
-function get_current_user(method: Method) {
+function get_current_user(method: Method, token?: string) {
   switch (method) {
     case "GET":
-      if (!currentSignedInUserId) {
-        throw new ApiError("400", "No user signed in");
-      }
+      // Validate token and get user ID
+      const userId = validateToken(token);
 
-      const user = usersById[currentSignedInUserId];
+      const user = usersById[userId];
       if (!user) {
         throw new ApiError("400", "User not found");
       }

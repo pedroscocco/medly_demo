@@ -29,14 +29,17 @@ export default function SortQuestion({
   lockedItems = {},
   isFirstQuestion = false,
 }: SortQuestionProps) {
+  // ===== Local State =====
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
+  // ===== Derived State =====
   // Calculate unassigned items based on currentAnswer
   const placedItems = Object.values(currentAnswer).flat();
   const unassignedItems = options
     .map((opt) => opt.option)
     .filter((item) => !placedItems.includes(item));
 
+  // ===== Handlers and Callbacks =====
   const handleDrop = (item: string, categoryId: string) => {
     if (disabled) return;
 
@@ -61,6 +64,7 @@ export default function SortQuestion({
     onAnswerChange(newCategoryItems);
   };
 
+  // ===== Render =====
   return (
     <DropZonesProvider>
       <Animated.View

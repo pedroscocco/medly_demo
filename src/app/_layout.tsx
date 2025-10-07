@@ -44,10 +44,15 @@ export default function RootLayout() {
 }
 
 const RootNavigator = () => {
+  // ===== Hooks =====
   const { authSession, isLoading } = useAuthSession();
+
+  // ===== Effects (Splash Screen) =====
   if (!isLoading) {
     SplashScreen.hide();
   }
+
+  // ===== Render =====
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!authSession}>

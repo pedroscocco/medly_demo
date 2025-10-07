@@ -12,17 +12,22 @@ import { styles } from "../styles/SignIn.styles";
 import { colors } from "../styles/designSystem";
 
 export default function SignIn() {
+  // ===== Hooks =====
   const { signUp, signIn, isSingingIn, error, clearError } = useAuthSession();
+
+  // ===== Local State =====
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // ===== Derived State =====
+  const isSignInMode = mode === "signin";
+
+  // ===== Handlers and Callbacks =====
   const handleSubmit = () => {
     mode === "signup"
       ? signUp({ email, password })
       : signIn({ email, password });
-    // Navigate after signing in
-    // router.replace('/');
   };
 
   const handleToggleMode = (selectedMode: "signin" | "signup") => {
@@ -30,8 +35,7 @@ export default function SignIn() {
     setMode(selectedMode);
   };
 
-  const isSignInMode = mode === "signin";
-
+  // ===== Render =====
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}

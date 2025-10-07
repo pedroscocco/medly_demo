@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createContext, type PropsWithChildren, use } from "react";
-import myfetch from "../api/myfetch";
+import { apiClient, type ApiError } from "../api/apiClient";
 import { useSecureStoreState } from "../hooks/useSecureStoreState";
+import { useAppSessionStore } from "../store/useAppSessionStore";
 
 type UserCredentials = { email: string; password: string };
 
@@ -9,15 +10,17 @@ const AuthContext = createContext<{
   signUp: (userCredentials: UserCredentials) => void;
   signIn: (userCredentials: UserCredentials) => void;
   signOut: () => void;
+  handleTokenExpiration: () => void;
   authSession?: { token: string } | null;
   isLoading: boolean;
   isSingingIn: boolean;
-  error: Error | null;
+  error: ApiError | null;
   clearError: () => void;
 }>({
   signUp: () => null,
   signIn: () => null,
   signOut: () => null,
+  handleTokenExpiration: () => null,
   authSession: null,
   isLoading: false,
   isSingingIn: false,
@@ -36,20 +39,30 @@ export function useAuthSession() {
 }
 
 export function AuthSessionProvider({ children }: PropsWithChildren) {
+  // ===== Routing & Data =====
   const queryClient = useQueryClient();
+
+  // ===== Hooks =====
   const [[isLoading, authSession], setAuthSession] =
     useSecureStoreState("authSession");
-  const signinMutation = useMutation({
-    mutationFn: async (params: {
-      isSignUp: boolean;
-      userCredentials: UserCredentials;
-    }) => {
-      const path = params.isSignUp ? "/auth/signup" : "/auth/login";
-      const response = await myfetch(path, "POST", params.userCredentials);
-      if (response.code === "200") {
-        return response.data;
+
+  // ===== Store State & Actions =====
+  const clearStoreOnSignOut = useAppSessionStore(
+    (state) => state.clearStoreOnSignOut
+  );
+
+  // ===== Mutations =====
+  const signinMutation = useMutation<any, ApiError, any>({
+    mutationFn: async (params: any) => {
+      const { data, error } = params.isSignUp
+        ? await apiClient.signup(params.userCredentials)
+        : await apiClient.login(params.userCredentials);
+
+      if (error) {
+        throw error;
       }
-      throw new Error(response.error || "Failed to log in");
+
+      return data;
     },
     onSettled: (data) => {
       if (data?.token) {
@@ -63,6 +76,14 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
     retry: false,
   });
 
+  // ===== Handlers and Callbacks =====
+  const signOutUser = () => {
+    clearStoreOnSignOut();
+    queryClient.removeQueries({ queryKey: ["currentUser"] });
+    setAuthSession(null);
+  };
+
+  // ===== Render =====
   return (
     <AuthContext
       value={{
@@ -73,8 +94,11 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
           signinMutation.mutate({ isSignUp: false, userCredentials });
         },
         signOut: () => {
-          queryClient.removeQueries({ queryKey: ["currentUser"] });
-          setAuthSession(null);
+          signOutUser();
+        },
+        handleTokenExpiration: () => {
+          // Attempt token refresh
+          signOutUser();
         },
         authSession: authSession ? { token: authSession } : null,
         isLoading,

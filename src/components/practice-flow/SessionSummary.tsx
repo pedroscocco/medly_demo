@@ -14,10 +14,12 @@ export default function SessionSummary({
   totalQuestions,
   bestStreak,
 }: SessionSummaryProps) {
+  // ===== Derived State =====
   const results = Object.values(markingResults);
   const correctCount = results.filter((r) => r.isCorrect).length;
   const accuracy = Math.round((correctCount / totalQuestions) * 100);
 
+  // ===== Render =====
   return (
     <View style={styles.container}>
       <View style={styles.statRow}>

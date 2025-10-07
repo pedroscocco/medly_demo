@@ -32,6 +32,7 @@ export default function Dialog({
   buttons,
   onDismiss,
 }: DialogProps) {
+  // ===== Render =====
   return (
     <Modal
       visible={visible}

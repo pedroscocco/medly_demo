@@ -6,7 +6,7 @@ import {
   QuestionSpec,
   SortAnswer,
   SortQuestionSpec,
-} from "../types";
+} from "../../types";
 
 /**
  * Async function to mark/score a question answer

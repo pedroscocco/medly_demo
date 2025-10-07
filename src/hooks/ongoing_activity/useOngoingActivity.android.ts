@@ -1,22 +1,22 @@
-import notifee, { AndroidImportance } from "@notifee/react-native";
+// import notifee, { AndroidImportance } from "@notifee/react-native";
 
-const NOTIFICATION_ID = "practice-session";
-const CHANNEL_ID = "practice-session-channel";
+// const NOTIFICATION_ID = "practice-session";
+// const CHANNEL_ID = "practice-session-channel";
 
 // Register foreground service
-notifee.registerForegroundService((notification) => {
-  return new Promise(() => {
-    // Keep the foreground service running
-    // It will be stopped when endSession is called
-  });
-});
+// notifee.registerForegroundService((notification) => {
+//   return new Promise(() => {
+//     // Keep the foreground service running
+//     // It will be stopped when endSession is called
+//   });
+// });
 
 async function ensureChannel() {
-  await notifee.createChannel({
-    id: CHANNEL_ID,
-    name: "Practice Session",
-    importance: AndroidImportance.HIGH,
-  });
+  // await notifee.createChannel({
+  //   id: CHANNEL_ID,
+  //   name: "Practice Session",
+  //   importance: AndroidImportance.HIGH,
+  // });
 }
 
 export function useOngoingActivity() {
@@ -29,19 +29,19 @@ export function useOngoingActivity() {
     (async () => {
       await ensureChannel();
 
-      await notifee.displayNotification({
-        id: NOTIFICATION_ID,
-        title: "Practice Session",
-        body: `${lessonName} • ${totalQuestions} questions`,
-        android: {
-          channelId: CHANNEL_ID,
-          asForegroundService: true,
-          ongoing: true,
-          pressAction: {
-            id: "default",
-          },
-        },
-      });
+      // await notifee.displayNotification({
+      //   id: NOTIFICATION_ID,
+      //   title: "Practice Session",
+      //   body: `${lessonName} • ${totalQuestions} questions`,
+      //   android: {
+      //     channelId: CHANNEL_ID,
+      //     asForegroundService: true,
+      //     ongoing: true,
+      //     pressAction: {
+      //       id: "default",
+      //     },
+      //   },
+      // });
     })();
   };
 
@@ -61,8 +61,8 @@ export function useOngoingActivity() {
   const endSession = () => {
     // Fire-and-forget to match iOS synchronous interface
     (async () => {
-      await notifee.cancelNotification(NOTIFICATION_ID);
-      await notifee.stopForegroundService();
+      // await notifee.cancelNotification(NOTIFICATION_ID);
+      // await notifee.stopForegroundService();
     })();
   };
 

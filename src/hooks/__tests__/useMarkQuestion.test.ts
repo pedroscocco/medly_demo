@@ -1,5 +1,5 @@
 import { McqAnswer, McqQuestionSpec } from "../../types";
-import { markMcqQuestion } from "../useMarkQuestion";
+import { markMcqQuestion } from "../practice-flow/useMarkQuestion";
 
 describe("markMcqQuestion", () => {
   const questionSpec: McqQuestionSpec = {

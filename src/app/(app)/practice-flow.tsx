@@ -1,23 +1,24 @@
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCompleteSession } from "../../api/hooks/useCompleteSession";
+import useSessionQuery from "../../api/hooks/useSessionQuery";
 import Dialog from "../../components/common/Dialog";
 import CheckButton from "../../components/practice-flow/CheckButton";
-import MultipleChoiceQuestion from "../../components/practice-flow/MultipleChoiceQuestion";
 import QuestionHeader from "../../components/practice-flow/QuestionHeader";
+import QuestionRenderer from "../../components/practice-flow/QuestionRenderer";
 import ResultFeedback from "../../components/practice-flow/ResultFeedback";
 import SessionSummary from "../../components/practice-flow/SessionSummary";
-import SortQuestion from "../../components/practice-flow/SortQuestion";
 import { useOngoingActivity } from "../../hooks/ongoing_activity/useOngoingActivity";
-import { useCompleteSession } from "../../hooks/useCompleteSession";
-import { useMarkQuestion } from "../../hooks/useMarkQuestion";
-import useSessionQuery from "../../hooks/useSessionQuery";
+import { useQuestionAnswer } from "../../hooks/practice-flow/useQuestionAnswer";
+import { useQuestionChecker } from "../../hooks/practice-flow/useQuestionChecker";
+import { useQuestionTiming } from "../../hooks/practice-flow/useQuestionTiming";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
-import { MarkingResult, SortQuestionSpec } from "../../types";
+import { isAnswerComplete } from "../../utils/questionValidation";
 
 export default function PracticeScreen() {
   // ===== Routing & Data =====
@@ -26,36 +27,32 @@ export default function PracticeScreen() {
   const fullQuestionStepsList = data?.steps || [];
 
   // ===== Local State =====
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [sortAnswer, setSortAnswer] = useState<{ [key: string]: string[] }>({});
-  const [lockedItems, setLockedItems] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-  const [sortAttempts, setSortAttempts] = useState(0);
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // ===== Hooks =====
-  const { isMarking, markAnswer } = useMarkQuestion();
   const ongoingActivity = useOngoingActivity();
-  const { completeSession } = useCompleteSession();
+  const { completeSession, prepareSessionData } = useCompleteSession();
   const NetworkToast = useNetworkStatus();
+
+  const answerState = useQuestionAnswer();
+  const {
+    selectedAnswer,
+    sortAnswer,
+    lockedItems,
+    sortAttempts,
+    setSelectedAnswer,
+    setSortAnswer,
+    updateLockedItems,
+    removeIncorrectItems,
+    incrementSortAttempts,
+    resetAnswer,
+    getAnswer,
+  } = answerState;
 
   // ===== Store State & Actions =====
   const currentSession = useAppSessionStore((state) => state.currentSession);
   const setNextStep = useAppSessionStore((state) => state.setNextStep);
-  const setMarkingResult = useAppSessionStore(
-    (state) => state.setMarkingResult
-  );
-  const updateBestStreak = useAppSessionStore(
-    (state) => state.updateBestStreak
-  );
-  const startQuestionTiming = useAppSessionStore(
-    (state) => state.startQuestionTiming
-  );
-  const completeQuestionTiming = useAppSessionStore(
-    (state) => state.completeQuestionTiming
-  );
   const commitCurrentSession = useAppSessionStore(
     (state) => state.commitCurrentSession
   );
@@ -65,8 +62,20 @@ export default function PracticeScreen() {
   const markingResults = currentSession.markingResults;
   const currentQuestion = fullQuestionStepsList[currentUserStep];
   const markingResult = markingResults[currentUserStep];
-  const currentQuestionStartTiming =
-    currentSession.questionTimings[currentUserStep]?.startedAt;
+
+  // ===== Custom Hooks (with derived state) =====
+  const { currentQuestionStartTiming, completeCurrentTiming } =
+    useQuestionTiming(currentUserStep);
+
+  const { handleCheck, isMarking } = useQuestionChecker({
+    currentUserStep,
+    fullQuestionStepsListLength: fullQuestionStepsList.length,
+    onSortPartialResult: (correctItems, incorrectItems) => {
+      updateLockedItems(correctItems);
+      removeIncorrectItems(incorrectItems);
+    },
+    onQuestionComplete: completeCurrentTiming,
+  });
 
   // ===== Effects =====
   // Redirect to home if no active session
@@ -75,21 +84,6 @@ export default function PracticeScreen() {
       router.replace("/");
     }
   }, [currentSession, router]);
-
-  // Start timing when question becomes visible
-  useLayoutEffect(() => {
-    if (!currentQuestionStartTiming) {
-      const now = Date.now();
-      startQuestionTiming(currentUserStep, now);
-      // Update Live Activity with new question timer
-      ongoingActivity.updateTimer(now);
-    }
-  }, [
-    currentQuestionStartTiming,
-    currentUserStep,
-    ongoingActivity,
-    startQuestionTiming,
-  ]);
 
   // ===== Early Returns (Loading/Error States) =====
   if (isLoading) {
@@ -116,117 +110,36 @@ export default function PracticeScreen() {
     );
   }
 
-  const handleCheck = async () => {
-    const completionTime = Date.now();
-    const userAnswer =
-      currentQuestion.questionData.questionType === "mcq"
-        ? selectedAnswer!
-        : sortAnswer;
+  // ===== Handlers and Callbacks =====
+  const handleCheckAnswer = async () => {
+    const userAnswer = getAnswer(currentQuestion.questionData.questionType);
+    if (!userAnswer) return;
 
-    const result = await markAnswer(currentQuestion, userAnswer);
+    const newAttempts =
+      currentQuestion.questionData.questionType === "sort"
+        ? incrementSortAttempts()
+        : sortAttempts;
 
-    // For sort questions, do partial checking (max 3 attempts)
-    if (currentQuestion.questionData.questionType === "sort") {
-      const newAttempts = sortAttempts + 1;
-      setSortAttempts(newAttempts);
-
-      // Get correct items from itemResults
-      const correctItems: { [key: string]: boolean } = {};
-      const incorrectItems: { [key: string]: boolean } = {};
-
-      if (result.itemResults) {
-        Object.entries(result.itemResults).forEach(([item, isCorrect]) => {
-          if (isCorrect) {
-            correctItems[item] = true;
-          } else {
-            incorrectItems[item] = true;
-          }
-        });
-      }
-
-      // Update locked items with newly correct items
-      setLockedItems(correctItems);
-
-      // If not fully correct and haven't reached max attempts, continue practicing
-      if (result.isCorrect === false && newAttempts < 3) {
-        // Remove incorrect items from categories
-        const newSortAnswer: { [key: string]: string[] } = {};
-        Object.entries(sortAnswer).forEach(([category, items]) => {
-          newSortAnswer[category] = items.filter(
-            (item) => !incorrectItems[item]
-          );
-        });
-        setSortAnswer(newSortAnswer);
-
-        // Don't set marking result yet - keep practicing
-        return;
-      }
-    }
-
-    // If fully correct, MCQ, or max attempts reached, complete the question
-    setMarkingResult(currentUserStep, result);
-    completeQuestionTiming(currentUserStep, completionTime);
-
-    // Update best streak in session
-    const updatedResults = { ...markingResults, [currentUserStep]: result };
-    const currentStreak = calculateStreak(updatedResults, currentUserStep);
-    updateBestStreak(currentStreak);
-
-    // Update Live Activity
-    const completedCount = Object.keys(updatedResults).length;
-    ongoingActivity.updateProgress(
-      fullQuestionStepsList.length,
-      completedCount,
-      currentStreak
-    );
+    await handleCheck(currentQuestion, userAnswer, newAttempts);
   };
 
   const handleContinue = () => {
     const isLastQuestion = currentUserStep >= fullQuestionStepsList.length - 1;
 
     if (isLastQuestion) {
-      // Complete session async
-      callCompleteSession();
+      // Prepare and complete session
+      const sessionData = prepareSessionData(
+        currentSession,
+        fullQuestionStepsList.length
+      );
+      completeSession(sessionData);
       // Show success dialog
       setShowSuccessDialog(true);
     } else {
-      moveToNextQuestion();
+      // Move to next question
+      setNextStep();
+      resetAnswer();
     }
-  };
-
-  const moveToNextQuestion = () => {
-    setNextStep();
-    setSelectedAnswer(null);
-    setSortAnswer({});
-    setLockedItems({});
-    setSortAttempts(0);
-  };
-
-  const callCompleteSession = async () => {
-    // Calculate time spent per question in seconds
-    const timeSpentPerQuestion = Object.keys(currentSession.questionTimings)
-      .sort((a, b) => Number(a) - Number(b))
-      .map((key) => {
-        const timing = currentSession.questionTimings[Number(key)];
-        if (timing.completedAt && timing.startedAt) {
-          return Math.round((timing.completedAt - timing.startedAt) / 1000);
-        }
-        return 0;
-      });
-
-    // Count correct answers
-    const correctAnswers = Object.values(currentSession.markingResults).filter(
-      (result) => result.isCorrect
-    ).length;
-
-    completeSession({
-      sessionId: currentSession.sessionId,
-      totalQuestions: fullQuestionStepsList.length,
-      correctAnswers,
-      timeSpentPerQuestion,
-      questionStreak: currentSession.bestStreak,
-      completedAt: new Date().toISOString(),
-    });
   };
 
   const finishSession = (status: "completed" | "abandoned") => {
@@ -249,94 +162,43 @@ export default function PracticeScreen() {
     finishSession("completed");
   };
 
-  const handleSortAnswerChange = (mapping: { [key: string]: string[] }) => {
-    setSortAnswer(mapping);
-  };
-
-  // ===== Helper Functions =====
-  const isCheckEnabled = (): boolean => {
-    const questionType = currentQuestion.questionData.questionType;
-
-    if (questionType === "mcq") {
-      return !!selectedAnswer;
-    }
-
-    if (questionType === "sort") {
-      const sortQ = currentQuestion as SortQuestionSpec;
-      const totalItems = sortQ.questionData.options.length;
-      const placedItems = Object.values(sortAnswer).flat().length;
-      return placedItems === totalItems;
-    }
-
-    return false;
-  };
-
-  const getQuestionTypeLabel = (): string => {
-    const questionType = currentQuestion.questionData.questionType;
-
-    switch (questionType) {
-      case "mcq":
-        return "Choose the correct answer";
-      case "sort":
-        return "Drag into the correct category";
-      default:
-        return "Question";
-    }
-  };
-
   // ===== Render =====
   return (
     <SafeAreaView style={styles.screenContainer}>
       <QuestionHeader
         currentStep={currentUserStep}
         totalSteps={fullQuestionStepsList.length}
-        questionType={getQuestionTypeLabel()}
+        questionType={currentQuestion.questionData.questionType}
         onClose={handleClose}
         isCompleted={showSuccessDialog}
         questionStartTime={currentQuestionStartTiming}
         isMarked={!!markingResult}
       />
-      {currentQuestion.questionData.questionType === "mcq" ? (
-        <MultipleChoiceQuestion
-          heading={currentQuestion.heading}
-          options={currentQuestion.questionData.options}
-          selectedAnswer={
-            markingResult
-              ? (markingResult.userAnswer as string)
-              : selectedAnswer
-          }
-          onSelectAnswer={setSelectedAnswer}
-          disabled={!!markingResult}
-          markingResult={markingResult}
-          isFirstQuestion={currentUserStep === 0 && Object.keys(markingResults).length === 0}
-        />
-      ) : currentQuestion.questionData.questionType === "sort" ? (
-        <SortQuestion
-          heading={currentQuestion.heading}
-          options={currentQuestion.questionData.options}
-          categories={currentQuestion.questionData.categories}
-          currentAnswer={
-            markingResult
-              ? (markingResult.userAnswer as { [key: string]: string[] })
-              : sortAnswer
-          }
-          onAnswerChange={handleSortAnswerChange}
-          disabled={!!markingResult}
-          lockedItems={lockedItems}
-          isFirstQuestion={currentUserStep === 0 && Object.keys(markingResults).length === 0}
-        />
-      ) : (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>Unsupported question type</Text>
-        </View>
-      )}
+      <QuestionRenderer
+        question={currentQuestion}
+        selectedAnswer={selectedAnswer}
+        sortAnswer={sortAnswer}
+        onSelectAnswer={setSelectedAnswer}
+        onSortAnswerChange={setSortAnswer}
+        markingResult={markingResult}
+        lockedItems={lockedItems}
+        isFirstQuestion={
+          currentUserStep === 0 && Object.keys(markingResults).length === 0
+        }
+      />
 
       {/* Result Feedback */}
       {markingResult && <ResultFeedback markingResult={markingResult} />}
 
       <CheckButton
-        onPress={markingResult ? handleContinue : handleCheck}
-        disabled={!markingResult && !isCheckEnabled()}
+        onPress={markingResult ? handleContinue : handleCheckAnswer}
+        disabled={
+          !markingResult &&
+          !isAnswerComplete(
+            currentQuestion,
+            getAnswer(currentQuestion.questionData.questionType)
+          )
+        }
         text={markingResult ? "Continue" : "Check"}
         loading={isMarking}
         markingResult={markingResult}
@@ -383,20 +245,4 @@ export default function PracticeScreen() {
       <NetworkToast />
     </SafeAreaView>
   );
-}
-
-// Helper: Calculate consecutive correct answers from the current position backwards
-function calculateStreak(
-  markingResults: { [questionIndex: number]: MarkingResult },
-  currentStep: number
-): number {
-  let streak = 0;
-  for (let i = currentStep; i >= 0; i--) {
-    if (markingResults[i]?.isCorrect) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  return streak;
 }

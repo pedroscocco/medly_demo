@@ -1,36 +1,36 @@
 import { useAuthSession } from "@/src/authentication/AuthSessionProvider";
 import AnimatedFox from "@/src/components/AnimatedFox";
-import { onlineManager, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import useSessionQuery from "../../api/hooks/useSessionQuery";
 import { useOngoingActivity } from "../../hooks/ongoing_activity/useOngoingActivity";
 import { useNetworkStatus } from "../../hooks/useNetworkStatus";
-import useSessionQuery from "../../hooks/useSessionQuery";
 import { useAppSessionStore } from "../../store/useAppSessionStore";
 import { colors } from "../../styles/designSystem";
 import { styles } from "../../styles/HomeScreen.styles";
 
 export default function Index() {
-  const { signOut } = useAuthSession();
+  // ===== Routing & Data =====
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useSessionQuery();
+
+  // ===== Hooks =====
+  const { signOut } = useAuthSession();
   const ongoingActivity = useOngoingActivity();
+  const NetworkToast = useNetworkStatus();
+
+  // ===== Store State & Actions =====
   const currentSession = useAppSessionStore((state) => state.currentSession);
   const startNewSession = useAppSessionStore((state) => state.startNewSession);
   const commitCurrentSession = useAppSessionStore(
     (state) => state.commitCurrentSession
   );
 
-  const NetworkToast = useNetworkStatus();
-
+  // ===== Effects =====
   // Redirect to practice-flow if there's an ongoing session
   useEffect(() => {
     if (currentSession?.sessionStatus === "in-progress") {
@@ -38,6 +38,7 @@ export default function Index() {
     }
   }, [currentSession?.sessionStatus, router]);
 
+  // ===== Handlers and Callbacks =====
   const handleStartPractice = () => {
     if (!data) return;
 
@@ -60,10 +61,10 @@ export default function Index() {
     if (currentSession) {
       commitCurrentSession("abandoned");
     }
-    onlineManager.setOnline(!onlineManager.isOnline());
     queryClient.resetQueries({ queryKey: ["questions"] });
   };
 
+  // ===== Render =====
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -76,7 +77,7 @@ export default function Index() {
       </View>
 
       {/* Fox Emoji */}
-      <AnimatedFox/>
+      <AnimatedFox />
 
       {/* Loading State */}
       {isLoading && (

@@ -23,8 +23,10 @@ export default function MultipleChoiceQuestion({
   markingResult = null,
   isFirstQuestion = false,
 }: MultipleChoiceQuestionProps) {
+  // ===== Derived State =====
   const isCorrect = markingResult?.isCorrect;
 
+  // ===== Render =====
   return (
     <Animated.View
       entering={isFirstQuestion ? undefined : swipeEntering}

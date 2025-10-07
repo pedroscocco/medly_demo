@@ -35,8 +35,10 @@ export default function CheckButton({
   loading = false,
   markingResult = null,
 }: CheckButtonProps) {
+  // ===== Derived State =====
   const iconColor = disabled ? colors.gray400 : colors.white;
 
+  // ===== Helper Functions =====
   // Determine button background color based on marking result
   const getButtonStyle = () => {
     if (disabled) return styles.checkButtonDisabled;
@@ -46,6 +48,7 @@ export default function CheckButton({
     return null;
   };
 
+  // ===== Render =====
   return (
     <View style={styles.bottomContainer}>
       <TouchableOpacity

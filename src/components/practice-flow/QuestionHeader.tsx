@@ -24,17 +24,21 @@ export default function QuestionHeader({
   questionStartTime,
   isMarked = false,
 }: QuestionHeaderProps) {
+  // ===== Local State =====
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // ===== Derived State =====
   const progressPercentage = isCompleted
     ? 100
     : (currentStep / totalSteps) * 100;
 
-  const [elapsedTime, setElapsedTime] = useState(0);
-
+  // ===== Effects =====
   // Reset timer when question changes
   useEffect(() => {
     setElapsedTime(0);
   }, [questionStartTime]);
 
+  // Update timer every second
   useEffect(() => {
     if (isMarked || !questionStartTime) {
       return;
@@ -48,6 +52,7 @@ export default function QuestionHeader({
     return () => clearInterval(interval);
   }, [questionStartTime, isMarked]);
 
+  // ===== Helper Functions =====
   const formatTime = (seconds: number): string => {
     if (isMarked) {
       return "-:--";
@@ -57,6 +62,18 @@ export default function QuestionHeader({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const getQuestionTypeLabel = (questionType: string): string => {
+    switch (questionType) {
+      case "mcq":
+        return "Choose the correct answer";
+      case "sort":
+        return "Drag into the correct category";
+      default:
+        return "Question";
+    }
+  };
+
+  // ===== Render =====
   return (
     <>
       {/* Header with progress bar */}
@@ -95,7 +112,7 @@ export default function QuestionHeader({
           <View style={styles.checkmark}>
             <Text style={styles.checkmarkText}>✓</Text>
           </View>
-          <Text style={styles.badgeText}>{questionType}</Text>
+          <Text style={styles.badgeText}>{getQuestionTypeLabel(questionType)}</Text>
         </View>
       </View>
     </>
