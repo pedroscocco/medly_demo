@@ -49,7 +49,7 @@ export default async function myfetch(
   path: string,
   method: Method = "GET",
   params?: any,
-  token?: string,
+  token?: string
 ): Promise<Response> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   try {
@@ -103,8 +103,10 @@ class ApiError extends Error {
 
 // Helper function to generate a new token
 function generateToken(): string {
-  return Math.random().toString(36).substring(2, 15) +
-         Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
 
 // Helper function to store a token with expiration
@@ -147,7 +149,7 @@ function sessions_questions(method: Method, token?: string) {
 }
 
 function createNewSession() {
-  const sessionStepsCount = 2 + Math.floor(Math.random() * 5); // 1 to 2 questions per session 
+  const sessionStepsCount = 3 + Math.floor(Math.random() * 5); // 1 to 2 questions per session
 
   // random selection indexes from total pool of questions
   const totalQuestions = MOCK_QUESTION_STEPS.steps.length;
@@ -157,7 +159,7 @@ function createNewSession() {
   }
 
   const selectedQuestionSteps = Array.from(selectedIndexes).map((index, i) => ({
-    ...MOCK_QUESTION_STEPS.steps[index],
+    // ...MOCK_QUESTION_STEPS.steps[index], // Uncomment to make sure a sort question is first on list for testing.
     index: i,
   }));
 
@@ -177,7 +179,11 @@ type SessionCompleteParams = {
   completedAt: string; // ISO timestamp
 };
 
-function sessions_complete(method: Method, params: SessionCompleteParams, token?: string) {
+function sessions_complete(
+  method: Method,
+  params: SessionCompleteParams,
+  token?: string
+) {
   switch (method) {
     case "POST":
       // Validate token
@@ -192,13 +198,13 @@ function sessions_complete(method: Method, params: SessionCompleteParams, token?
 
 function auth_login(
   method: string,
-  params: { email: string; password: string },
+  params: { email: string; password: string }
 ) {
   switch (method) {
     case "POST":
       // Find user by email
       const user = Object.values(usersById).find(
-        (u) => u.email === params.email,
+        (u) => u.email === params.email
       );
 
       if (!user) {
@@ -225,7 +231,7 @@ function auth_login(
 
 function auth_signup(
   method: string,
-  params: { email: string; password: string },
+  params: { email: string; password: string }
 ) {
   switch (method) {
     case "POST":

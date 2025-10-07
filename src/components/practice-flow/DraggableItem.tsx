@@ -57,7 +57,7 @@ export default function DraggableItem({
       const measured = measure(animatedRef);
       if (measured) {
         itemCenterX.value = measured.pageX + measured.width / 2;
-        itemCenterY.value = measured.pageY + measured.height / 2;
+        itemCenterY.value = measured.pageY + measured.height / 2 - 50;
       }
       pressed.value = true;
     })
