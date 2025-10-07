@@ -4,6 +4,8 @@ import React from "react";
 import { Session } from "../../../types";
 import PracticeScreen from "../../../app/(app)/practice-flow";
 import { AuthSessionProvider } from "../../../authentication/AuthSessionProvider";
+import { useAppSessionStore } from "../../../store/useAppSessionStore";
+import useSessionQuery from "../../../api/hooks/useSessionQuery";
 
 // Mock dependencies
 jest.mock("expo-router", () => ({
@@ -24,10 +26,7 @@ jest.mock("../../../hooks/ongoing_activity/useOngoingActivity", () => ({
 }));
 
 jest.mock("../../../hooks/useNetworkStatus", () => ({
-  useNetworkStatus: () => {
-    const React = require("react");
-    return () => null;
-  },
+  useNetworkStatus: () => () => null,
 }));
 
 // Mock session query
@@ -97,18 +96,26 @@ function createWrapper() {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <AuthSessionProvider>{children}</AuthSessionProvider>
     </QueryClientProvider>
   );
+  Wrapper.displayName = "PracticeFlowTestWrapper";
+
+  return Wrapper;
 }
 
 describe("PracticeFlow - User Behavior Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset the useSessionQuery mock to default behavior
+    (useSessionQuery as jest.Mock).mockReturnValue({
+      data: mockSessionData,
+      isLoading: false,
+      error: null,
+    });
     // Reset store before each test
-    const { useAppSessionStore } = require("../../../store/useAppSessionStore");
     useAppSessionStore.setState({
       currentSession: {
         sessionId: "test-session-1",
@@ -326,15 +333,13 @@ describe("PracticeFlow - User Behavior Tests", () => {
   describe("Loading and Error States", () => {
     it("shows loading spinner while fetching questions", () => {
       // Mock loading state
-      jest
-        .spyOn(require("../../../api/hooks/useSessionQuery"), "default")
-        .mockReturnValueOnce({
-          data: null,
-          isLoading: true,
-          error: null,
-        });
+      (useSessionQuery as jest.Mock).mockReturnValueOnce({
+        data: null,
+        isLoading: true,
+        error: null,
+      });
 
-      const { getByTestId, queryByTestId } = render(<PracticeScreen />, {
+      const { queryByTestId } = render(<PracticeScreen />, {
         wrapper: createWrapper(),
       });
 
@@ -345,12 +350,8 @@ describe("PracticeFlow - User Behavior Tests", () => {
     });
 
     it("shows error message when questions fail to load", async () => {
-      // Save original mock
-      const useSessionQuery = require("../../../api/hooks/useSessionQuery");
-      const originalMock = useSessionQuery.default;
-
-      // Mock error state
-      useSessionQuery.default = jest.fn().mockReturnValue({
+      // Mock error state - use mockReturnValue instead of mockReturnValueOnce
+      (useSessionQuery as jest.Mock).mockReturnValue({
         data: null,
         isLoading: false,
         error: new Error("Failed to fetch"),
@@ -364,9 +365,6 @@ describe("PracticeFlow - User Behavior Tests", () => {
       await waitFor(() => {
         expect(getByText("Error loading questions")).toBeTruthy();
       });
-
-      // Restore original mock
-      useSessionQuery.default = originalMock;
     });
   });
 

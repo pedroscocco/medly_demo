@@ -32,6 +32,7 @@ export default function CategoryBox({
   // Re-measure when remeasureTrigger changes
   useDerivedValue(() => {
     // Watch the trigger to force re-measurement
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _ = remeasureTrigger.value;
 
     const measured = measure(animatedRef);

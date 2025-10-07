@@ -16,11 +16,14 @@ function createWrapper() {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <AuthSessionProvider>{children}</AuthSessionProvider>
     </QueryClientProvider>
   );
+  Wrapper.displayName = "TestWrapper";
+
+  return Wrapper;
 }
 
 describe("SignIn Screen - User Perspective Tests", () => {

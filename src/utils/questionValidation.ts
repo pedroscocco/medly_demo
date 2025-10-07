@@ -7,7 +7,7 @@ export function isAnswerComplete(
   question: QuestionSpec,
   answer: string | { [key: string]: string[] } | null
 ): boolean {
-  const questionType = question.questionData.questionType;
+  const questionType = question.questionData?.questionType;
 
   if (questionType === "mcq") {
     return !!answer;

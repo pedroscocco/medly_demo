@@ -1,3 +1,4 @@
+import QuestionHeader from "@/src/components/practice-flow/QuestionHeader";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { styles } from "@/src/styles/practice-flow/PracticeScreen.styles";
 import { useRouter } from "expo-router";
@@ -8,7 +9,6 @@ import { useCompleteSession } from "../../api/hooks/useCompleteSession";
 import useSessionQuery from "../../api/hooks/useSessionQuery";
 import Dialog from "../../components/common/Dialog";
 import CheckButton from "../../components/practice-flow/CheckButton";
-import QuestionHeader from "../../components/practice-flow/QuestionHeader";
 import QuestionRenderer from "../../components/practice-flow/QuestionRenderer";
 import ResultFeedback from "../../components/practice-flow/ResultFeedback";
 import SessionSummary from "../../components/practice-flow/SessionSummary";
@@ -168,7 +168,7 @@ export default function PracticeScreen() {
       <QuestionHeader
         currentStep={currentUserStep}
         totalSteps={fullQuestionStepsList.length}
-        questionType={currentQuestion.questionData.questionType}
+        questionType={currentQuestion.questionData?.questionType}
         onClose={handleClose}
         isCompleted={showSuccessDialog}
         questionStartTime={currentQuestionStartTiming}
@@ -196,7 +196,7 @@ export default function PracticeScreen() {
           !markingResult &&
           !isAnswerComplete(
             currentQuestion,
-            getAnswer(currentQuestion.questionData.questionType)
+            getAnswer(currentQuestion.questionData?.questionType)
           )
         }
         text={markingResult ? "Continue" : "Check"}

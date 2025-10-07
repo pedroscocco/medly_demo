@@ -1,96 +1,155 @@
-# Medly Demo - Practice Quiz Application
+# Learnly - Practice Quiz Application
 
-A React Native mobile app that provides an interactive learning experience through structured question-and-answer workflows. Users can practice their knowledge with immediate feedback and progress tracking.
-
-## Overview
-
-This app helps users practice and test their understanding of various topics through an engaging, user-friendly practice environment. It features a sequential question flow where users answer questions, receive validation feedback, and track their progress through each session.
+React Native mobile app for interactive learning through practice sessions with real-time feedback and progress tracking.
 
 ## Features
 
-- **Home Page**: Entry point with navigation to practice mode
-- **Practice Flow**: Interactive question interface with sequential progression
-- **Multiple Choice Questions**: Clean UI with selectable options and visual feedback
-- **Sort/Categorization Questions**: Tap-based sorting into categories (tap-to-place implementation)
-  - 2x2 category grid with dashed borders
-  - Tap items to select, tap categories to place
-  - Items can be repositioned between categories
-- **Progress Tracking**: Visual progress bar with step counter (e.g., 1/10)
-- **Question Navigation**: Sequential flow through question sets
-- **Offline Development**: Mock API for frontend development without backend dependency
+- **Authentication**: Secure JWT-based auth with SecureStore
+- **Practice Sessions**: MCQ and Sort questions with immediate feedback
+- **Progress Tracking**: Real-time timer, streak tracking, session analytics
+- **Native Widgets**: iOS Live Activities for session progress (Android planned)
+- **Offline Support**: Questions cached locally, mutations queued when offline
 
-### Planned Features
+## Technical Decisions
 
-- Answer validation with immediate feedback
-- Gesture-based drag-and-drop for sort questions (upgrade from tap-based)
-- Short answer questions with text input
-- Session completion summary
+### State Management
 
-## Tech Stack
+**Zustand + React Query caching** with automatic AsyncStore persistence middlewares for both.
 
-- **React Native** with Expo
-- **TypeScript** for type safety
-- **React Query** (@tanstack/react-query) for data fetching and caching
-- **Zustand** for state management
-- **Expo Router** for navigation
+- Zustand manages session state, user progress, and history
+- React Query handles API calls with aggressive caching
+- Both use persistence middleware for offline-first experience
 
-## Getting Started
+### Authentication
+
+**SecureStore for token storage** with token expiry checking on every API response.
+
+**Next Steps**: Token refresh logic for seamless session extension
+
+### Practice Session Screen
+
+Single screen with questions sliding through as cards. Timer starts when question becomes visible and persists in state. Timer updates native widget in real-time.
+
+**All-or-nothing flow**: User either completes entire session (sees success dialog, commits to backend) or abandons session entirely.
+
+**Centralized style constants** (`src/styles/designSystem.ts`) for consistent theming across all components:
+- Colors, spacing, typography, shadows
+- Component-specific styles import from design system
+
+### Native Widget
+
+**Expo Targets library** creates separate native target linked to project with automatic prebuild. Native Expo Module links Swift Live Activity configuration.
+
+**Development workflow**:
+1. Develop widget in Xcode
+2. Changes reflected in React Native project
+3. Build flow completely Expo-managed via prebuild and run:ios
+
+**Next Steps**: Android Ongoing Activity Notification
+
+### Offline Support
+
+**React Query cache retention set to infinite** for session questions - fetch once, app works offline. Mutation queue persisted to AsyncStore when offline, syncs automatically when online.
+
+**Next Steps**: Optimistic cache updates for better perceived performance
+
+## Setup Instructions
 
 ```bash
 # Install dependencies
 npm install
 
-# Start the development server
-npm start
+# Generate native projects (required for widgets)
+npx expo prebuild
 
-# Run on specific platforms
-npm run ios
-npm run android
-npm run web
+# Run on platform (choose iOS or Android)
+npx expo run:ios
+npx expo run:android
+
+# OR use EAS Build for Android (faster than local)
+eas build -p android --profile development
+
+# Start Expo development server
+npx expo start
 ```
 
-## Architecture
+## App Usage
 
-- **Mock API** (`src/api/`): Simulates backend responses for offline development
-- **State Management** (`src/store/`): Zustand stores for app state and user progress
-- **React Query Hooks** (`src/hooks/`): Data fetching with automatic caching
-- **Component Architecture** (`src/components/`): Modular, reusable UI components
-  - QuestionHeader: Progress bar, close button, and question type badge
-  - MultipleChoiceQuestion: Question display and answer options
-  - SortQuestion: Category grid and tap-based item sorting (temporary tap implementation)
-  - CheckButton: Bottom action button for answer submission
-  - Composable design for flexible question flow assembly
-- **Design System** (`src/styles/`): Centralized style constants for consistent theming
-  - Colors, spacing, typography, shadows, and other design tokens
-  - Component-specific style files using design system constants
-- **Type Definitions** (`src/types.ts`): TypeScript interfaces for question data structures
+**Sign Up** with new credentials for testing, or **Sign In** with:
+- Email: `p`
+- Password: `123`
 
-## Future Enhancements
+On the main screen, you can start a new practice session or generate a new one with fresh random questions.
 
-- User authentication with protected routes
-- Session persistence with detailed analytics
-- Home screen widget for active practice sessions
-- Full backend API integration
-- Offline support with sync capabilities
+**Note**: Mock backend includes fake delays to simulate loading states on slow networks - this is why you'll see brief spinners throughout the app.
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- path/to/test.tsx
+
+# Run E2E tests with Maestro
+maestro test .maestro/
+```
+
+## Test Coverage
+
+**Unit Tests**: Critical business logic (question marking, validation, score calculation)
+
+**Integration Tests**: User behavior flows (practice session, authentication, form interactions)
+
+**E2E Tests**: Complete journeys on real devices (signup → practice → completion)
 
 ## Project Structure
 
 ```
 src/
-├── api/          # Mock API and data fetching utilities
-├── app/          # Screen components and navigation
-├── components/   # Modular, reusable UI components
-│   ├── QuestionHeader.tsx           # Progress bar and navigation
-│   ├── MultipleChoiceQuestion.tsx   # MCQ question content
-│   ├── SortQuestion.tsx             # Sort/categorization question
-│   └── CheckButton.tsx              # Answer submission button
-├── hooks/        # React Query hooks
-├── store/        # Zustand state management
-├── styles/       # Design system and component styles
-│   ├── designSystem.ts              # Centralized style constants
-│   ├── QuestionHeader.styles.ts
-│   ├── MultipleChoiceQuestion.styles.ts
-│   ├── SortQuestion.styles.ts
-│   └── CheckButton.styles.ts
-└── types.ts      # TypeScript type definitions
+├── api/                  # API client with interceptors
+│   └── hooks/           # React Query hooks per endpoint
+├── app/                 # Screens (Expo Router)
+│   ├── (app)/          # Authenticated routes
+│   └── signin.tsx      # Auth screen
+├── authentication/      # Auth context provider
+├── components/          # Reusable UI components
+│   ├── common/         # Dialogs, shared components
+│   └── practice-flow/  # Question components
+├── hooks/              # Custom hooks
+│   ├── practice-flow/  # Session logic
+│   └── ongoing_activity/ # Native widget integration
+├── store/              # Zustand stores
+├── styles/             # Design system
+├── utils/              # Helper functions
+├── types.ts            # TypeScript definitions
+└── widgets/            # iOS widget native code
 ```
+
+## Key Technologies
+
+- **React Native** + **Expo** for cross-platform mobile
+- **TypeScript** for type safety
+- **React Query** for server state and caching
+- **Zustand** for client state management
+- **Expo Router** for navigation
+- **React Native Reanimated** for smooth animations
+- **SecureStore** for secure token storage
+- **AsyncStorage** for state persistence
+- **Maestro** for E2E testing
+- **Jest** + **React Testing Library** for unit/integration tests
+
+## Next Steps
+
+### Authentication
+- Token refresh logic
+- Better network error handling
+
+### Native Features
+- Android Ongoing Activity Notification
+- Widget tap actions to return to app
+
+### Offline
+- Optimistic updates for mutations
+- Enhanced network status UI

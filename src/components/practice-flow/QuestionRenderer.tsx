@@ -26,7 +26,7 @@ export default function QuestionRenderer({
   isFirstQuestion,
 }: QuestionRendererProps) {
   // ===== Derived State =====
-  const questionType = question.questionData.questionType;
+  const questionType = question.questionData?.questionType;
   const isDisabled = !!markingResult;
 
   // ===== Render =====

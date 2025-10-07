@@ -159,14 +159,14 @@ function createNewSession() {
   }
 
   const selectedQuestionSteps = Array.from(selectedIndexes).map((index, i) => ({
-    // ...MOCK_QUESTION_STEPS.steps[index], // Uncomment to make sure a sort question is first on list for testing.
-    index: i,
+    ...MOCK_QUESTION_STEPS.steps[index],
   }));
 
   return {
     sessionId: Math.random().toString(36).substring(2, 15),
-    // steps: selectedQuestionSteps,
-    steps: [MOCK_QUESTION_STEPS.steps[8], ...selectedQuestionSteps],
+    steps: selectedQuestionSteps,
+    // Uncomment to make sure a sort question is first on list for testing.
+    // steps: [MOCK_QUESTION_STEPS.steps[8], ...selectedQuestionSteps],
   };
 }
 
