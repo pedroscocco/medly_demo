@@ -1,5 +1,7 @@
 # Learnly - Practice Quiz Application
 
+<img width="215" height="466" alt="Simulator Screenshot - iPhone 16 Plus - 2025-10-07 at 11 20 18" src="https://github.com/user-attachments/assets/8a2c7a50-8690-41a7-881a-e6ab6c96d13a" />
+
 React Native mobile app for interactive learning through practice sessions with real-time feedback and progress tracking.
 
 ## Features
