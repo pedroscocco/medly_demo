@@ -12,7 +12,7 @@ import {
  * Async function to mark/score a question answer
  * Simulates async behavior for future API integration
  */
-async function markQuestion(
+export async function markQuestion(
   questionSpec: QuestionSpec,
   userAnswer: McqAnswer | SortAnswer,
 ): Promise<MarkingResult> {
@@ -67,7 +67,7 @@ export function markMcqQuestion(
  * Mark a sort/categorization question
  * Supports partial correctness - each correctly placed item counts
  */
-function markSortQuestion(
+export function markSortQuestion(
   questionSpec: SortQuestionSpec,
   userAnswer: SortAnswer,
 ): MarkingResult {
@@ -91,7 +91,7 @@ function markSortQuestion(
 
   const score =
     totalItems > 0 ? Math.round((correctItems / totalItems) * 100) : 0;
-  const isCorrect = correctItems === totalItems;
+  const isCorrect = totalItems > 0 && correctItems === totalItems;
 
   let feedback = "";
   if (isCorrect) {
@@ -127,7 +127,6 @@ export function useMarkQuestion() {
       setIsMarking(false);
       return result;
     } catch (error) {
-      console.error("Error marking question:", error);
       setIsMarking(false);
       throw error;
     }
